@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Product Catalog Cart Integration</title>
+  <script src="https://js.zohostatic.com/zccreator/js/sdk/1.0.0/zc.sdk.js"></script>
+  <script>
+    ZOHO.embeddedApp.init().then(() => {
+      // Extract OrderID from query or hash
+      const params = new URLSearchParams(window.location.search);
+      const orderId = params.get("OrderID") || (window.location.hash.split("OrderID=")[1] || "");
+      // Delay to allow Creator UI to render
+      setTimeout(() => {
+        document.querySelectorAll(".zc-card").forEach(card => {
+          const recId = card.getAttribute("data-record-id");
+          const content = card.querySelector(".zc-card-content") || card;
+          // Create quantity input
+          const qty = document.createElement("input");
+          qty.type = "number";
+          qty.min = 1;
+          qty.value = 1;
+          qty.style = "width:50px;margin:5px;";
+          // Create add-to-cart button
+          const btn = document.createElement("button");
+          btn.textContent = "Add to Cart";
+          btn.style = "margin:5px;";
+          btn.onclick = () => {
+            ZOHO.CREATOR.API.insertRecord({
+              formName: "Cart_Item",
+              data: {
+                "Customer_Order": orderId,
+                "Product": recId,
+                "Quantity": qty.value
+              }
+            }).then(() => {
+              alert(qty.value + " item(s) added to cart");
+            }).catch(err => {
+              console.error("Failed to add to cart:", err);
+              alert("Error adding to cart");
+            });
+          };
+          // Append controls
+          content.appendChild(qty);
+          content.appendChild(btn);
+        });
+      }, 500);
+    });
+  </script>
+</head>
+<body>
+</body>
+</html>
