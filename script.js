@@ -1,49 +1,31 @@
-// script.js
-(function() {
-  // ينتظر تحمّل DOM كامل
-  document.addEventListener('DOMContentLoaded', function() {
-    // يختار كل “كارد” منتج
-    // غيّر '.product-card' إلى السلكتور المناسب في صفحتك
-    var cards = document.querySelectorAll('.product-card');
-     alert("0000");
-    cards.forEach(function(card) {
-      // يمنع الإضافة المكررة لو رجعنا وحملنا الودجت مرتين
-      if (card.querySelector('.custom-actions')) return;
+document.addEventListener("DOMContentLoaded", function () {
+    const productCards = document.querySelectorAll('.zcs-product-card'); // أو الكلاس الخاص بالبطاقات حسب التطبيق
 
-      // إنشاء حاوية للأكشنز
-      var wrapper = document.createElement('div');
-      wrapper.className = 'custom-actions';
-      wrapper.style.marginTop = '8px';
-      
-      // حقول الكمية
-      var qty = document.createElement('input');
-      qty.type = 'number';
-      qty.min = '1';
-      qty.value = '1';
-      qty.className = 'quantity-input';
-      qty.style.width = '60px';
-      qty.style.marginRight = '6px';
-      
-      // زر الإضافة
-      var btn = document.createElement('button');
-      btn.textContent = 'Add';
-      btn.className = 'add-to-cart';
-      btn.style.padding = '6px 12px';
-      btn.style.cursor = 'pointer';
-      
-      // تجميع
-      wrapper.appendChild(qty);
-      wrapper.appendChild(btn);
-      card.appendChild(wrapper);
+    productCards.forEach(card => {
+        // إنشاء input للكمية
+        const quantityInput = document.createElement("input");
+        quantityInput.type = "number";
+        quantityInput.min = 1;
+        quantityInput.value = 1;
+        quantityInput.style.width = "60px";
+        quantityInput.style.marginTop = "10px";
 
-      // حدث الضغط
-      btn.addEventListener('click', function() {
-        var count = qty.value;
-        // لالتقاط الـ ID أو الاسم من الـ data-attribute
-        var id = card.getAttribute('data-product-id') || card.dataset.id || 'unknown';
-        // هنا تحط منطق الإضافة — الآن للتجربة
-        alert('Add ' + count + ' of product ' + id);
-      });
+        // إنشاء زر الإضافة
+        const addButton = document.createElement("button");
+        addButton.innerText = "Add";
+        addButton.style.marginLeft = "10px";
+
+        addButton.addEventListener("click", () => {
+            const quantity = quantityInput.value;
+            const productName = card.querySelector("h3")?.innerText || "Unknown";
+            alert(`Added ${quantity} of ${productName}`);
+            // هون تقدر تستدعي أي API لإضافة المنتج للسلة
+        });
+
+        // إضافتهم للبطاقة
+        const actionContainer = document.createElement("div");
+        actionContainer.appendChild(quantityInput);
+        actionContainer.appendChild(addButton);
+        card.appendChild(actionContainer);
     });
-  });
-})();
+});
