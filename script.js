@@ -5,7 +5,7 @@
     // يختار كل “كارد” منتج
     // غيّر '.product-card' إلى السلكتور المناسب في صفحتك
     var cards = document.querySelectorAll('.product-card');
-    
+     alert("0000");
     cards.forEach(function(card) {
       // يمنع الإضافة المكررة لو رجعنا وحملنا الودجت مرتين
       if (card.querySelector('.custom-actions')) return;
