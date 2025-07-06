@@ -1,5 +1,6 @@
 
 setTimeout(function () {
+    alert("xxxx");
     $(".zcp-col").each(function () {
         if (!$(this).hasClass("custom-cart")) {
             $(this).addClass("custom-cart");
