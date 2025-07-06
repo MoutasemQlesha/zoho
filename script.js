@@ -1,8 +1,9 @@
 document.addEventListener("DOMContentLoaded", function () {
-    const productCards = document.querySelectorAll('.zcs-product-card'); // أو الكلاس الخاص بالبطاقات حسب التطبيق
+    // اختيار كروت المنتجات حسب الكلاس الجديد
+    const productCards = document.querySelectorAll('.zcp-col.zcp-panel-rotype-auto');
 
     productCards.forEach(card => {
-        // إنشاء input للكمية
+        // إنشاء حقل إدخال للكمية
         const quantityInput = document.createElement("input");
         quantityInput.type = "number";
         quantityInput.min = 1;
@@ -15,17 +16,19 @@ document.addEventListener("DOMContentLoaded", function () {
         addButton.innerText = "Add";
         addButton.style.marginLeft = "10px";
 
+        // عند الضغط على الزر
         addButton.addEventListener("click", () => {
             const quantity = quantityInput.value;
-            const productName = card.querySelector("h3")?.innerText || "Unknown";
+            const productName = card.innerText?.split("\n")[0] || "Unknown"; // نحاول نجيب اسم المنتج
             alert(`Added ${quantity} of ${productName}`);
-            // هون تقدر تستدعي أي API لإضافة المنتج للسلة
         });
 
-        // إضافتهم للبطاقة
+        // تجميع العناصر في حاوية
         const actionContainer = document.createElement("div");
         actionContainer.appendChild(quantityInput);
         actionContainer.appendChild(addButton);
+
+        // إضافة الحاوية إلى كرت المنتج
         card.appendChild(actionContainer);
     });
 });
