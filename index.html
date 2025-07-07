@@ -1,22 +1,30 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Zoho Wizard</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>Zoho Order Wizard</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="wizard-container">
-        <h2>Step 1: Select Customer</h2>
-        <select id="customerDropdown">
-            <option value="">Loading...</option>
-        </select>
-        <button onclick="addNewCustomer()">+ Add New</button>
-        <button onclick="goToStep2()">Next</button>
-
-        <div id="step2" style="display:none;">
-            <h2>Step 2: Select Products</h2>
+    <div id="app">
+        <div class="step step-1">
+            <h2>Step 1: Select Customer</h2>
+            <select id="customerDropdown"></select>
+            <button onclick="addNewCustomer()">+ Add New</button>
+            <button onclick="goToStep(2)">Next</button>
+        </div>
+        <div class="step step-2" style="display:none;">
+            <h2>Select Products</h2>
             <div id="productList" class="product-grid"></div>
+            <button onclick="goToStep(3)">Next</button>
+        </div>
+        <div class="step step-3" style="display:none;">
+            <h2>Cart</h2>
+            <div id="cartItems"></div>
+            <div>Total: <span id="orderTotal">$0.00</span></div>
+            <button onclick="goToStep(2)">Previous</button>
+            <button onclick="submitOrder()">Submit</button>
         </div>
     </div>
     <script src="script.js"></script>

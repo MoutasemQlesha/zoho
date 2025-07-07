@@ -1,17 +1,23 @@
+
 body {
     font-family: Arial, sans-serif;
-    background: #f4f4f4;
     margin: 0;
     padding: 20px;
 }
-.wizard {
-    background: white;
-    padding: 20px;
-    border-radius: 10px;
+h2 {
+    margin-bottom: 10px;
 }
-.step {
-    display: none;
+.product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 16px;
 }
-.step.active {
-    display: block;
+.product-card {
+    border: 1px solid #ccc;
+    padding: 10px;
+    text-align: center;
+}
+button {
+    padding: 8px 12px;
+    margin: 5px;
 }
