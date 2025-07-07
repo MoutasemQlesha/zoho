@@ -2,28 +2,21 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Order Wizard</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Zoho Wizard</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="wizard">
-        <div class="step step-1 active">
-            <h2>Step 1: Select Customer</h2>
-            <select id="customerSelect"></select>
-            <button onclick="addNewCustomer()">+ Add New</button>
-            <button onclick="nextStep()">Next</button>
-        </div>
-        <div class="step step-2">
+    <div class="wizard-container">
+        <h2>Step 1: Select Customer</h2>
+        <select id="customerDropdown">
+            <option value="">Loading...</option>
+        </select>
+        <button onclick="addNewCustomer()">+ Add New</button>
+        <button onclick="goToStep2()">Next</button>
+
+        <div id="step2" style="display:none;">
             <h2>Step 2: Select Products</h2>
-            <div id="productGrid"></div>
-            <button onclick="prevStep()">Previous</button>
-            <button onclick="nextStep()">Next</button>
-        </div>
-        <div class="step step-3">
-            <h2>Step 3: Review Order</h2>
-            <div id="cartSummary"></div>
-            <button onclick="prevStep()">Previous</button>
-            <button onclick="submitOrder()">Submit</button>
+            <div id="productList" class="product-grid"></div>
         </div>
     </div>
     <script src="script.js"></script>
