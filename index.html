@@ -1,59 +1,79 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نظام الطلبات</title>
+    <title>Order Wizard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        :root {
+            --primary-color: #2a5bd7;
+            --secondary-color: #f0f0f0;
+            --text-color: #333;
+            --light-text: #777;
+            --border-color: #ddd;
+            --error-color: #d32f2f;
+            --success-color: #388e3c;
+        }
+        
         * {
             box-sizing: border-box;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
         }
+        
         body {
             background-color: #f5f5f5;
-            margin: 0;
             padding: 20px;
+            color: var(--text-color);
         }
+        
         .wizard-container {
             max-width: 800px;
             margin: 0 auto;
             background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
             overflow: hidden;
         }
+        
         .wizard-header {
-            padding: 15px 20px;
-            border-bottom: 1px solid #eee;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            padding: 20px;
+            border-bottom: 1px solid var(--border-color);
+            text-align: center;
         }
+        
         .wizard-title {
-            font-size: 18px;
+            font-size: 22px;
             font-weight: 600;
-            color: #333;
+            color: var(--primary-color);
         }
+        
         .wizard-steps {
             display: flex;
             padding: 0;
             margin: 0;
             list-style: none;
-            background-color: #f9f9f9;
+            background-color: var(--secondary-color);
         }
+        
         .wizard-step {
             flex: 1;
             text-align: center;
             padding: 15px 10px;
             position: relative;
-            color: #777;
+            color: var(--light-text);
             font-weight: 500;
+            font-size: 14px;
         }
+        
         .wizard-step.active {
-            color: #2a5bd7;
+            color: var(--primary-color);
             background-color: white;
             font-weight: 600;
         }
+        
         .wizard-step.active:after {
             content: '';
             position: absolute;
@@ -61,475 +81,876 @@
             left: 0;
             right: 0;
             height: 3px;
-            background-color: #2a5bd7;
+            background-color: var(--primary-color);
         }
+        
         .wizard-content {
             padding: 25px;
+            min-height: 300px;
         }
+        
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 25px;
             position: relative;
         }
+        
         .form-label {
             display: block;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
             font-weight: 500;
-            color: #444;
+            color: var(--text-color);
+            font-size: 15px;
         }
+        
         .form-control {
             width: 100%;
-            padding: 10px 15px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 14px;
+            padding: 12px 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 15px;
+            transition: border-color 0.3s;
         }
-        .search-input {
-            padding-right: 35px;
+        
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-color);
         }
-        .search-icon {
+        
+        .select-wrapper {
+            position: relative;
+        }
+        
+        .select-wrapper:after {
+            content: '\f078';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
             position: absolute;
             right: 15px;
-            top: 38px;
-            color: #777;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--light-text);
+            pointer-events: none;
         }
+        
+        .search-input {
+            padding-left: 40px;
+        }
+        
+        .search-icon {
+            position: absolute;
+            left: 15px;
+            top: 42px;
+            color: var(--light-text);
+        }
+        
         .btn {
-            padding: 10px 20px;
-            border-radius: 4px;
+            padding: 12px 24px;
+            border-radius: 8px;
             border: none;
             font-weight: 500;
             cursor: pointer;
-            font-size: 14px;
+            font-size: 15px;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
         }
+        
+        .btn i {
+            margin-right: 8px;
+        }
+        
         .btn-primary {
-            background-color: #2a5bd7;
+            background-color: var(--primary-color);
             color: white;
         }
-        .btn-secondary {
-            background-color: #f0f0f0;
-            color: #555;
-            margin-left: 10px;
+        
+        .btn-primary:hover {
+            background-color: #1a4bc7;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
+        
+        .btn-secondary {
+            background-color: var(--secondary-color);
+            color: var(--text-color);
+        }
+        
+        .btn-secondary:hover {
+            background-color: #e0e0e0;
+        }
+        
         .btn-add {
             background-color: transparent;
-            color: #2a5bd7;
-            border: 1px dashed #2a5bd7;
-            padding: 8px 15px;
+            color: var(--primary-color);
+            border: 1px dashed var(--primary-color);
+            padding: 10px 20px;
             display: inline-flex;
             align-items: center;
         }
-        .btn-add:before {
-            content: "+";
-            margin-left: 5px;
-            font-size: 18px;
+        
+        .btn-add:hover {
+            background-color: rgba(42, 91, 215, 0.1);
         }
+        
         .wizard-footer {
-            padding: 15px 20px;
-            border-top: 1px solid #eee;
+            padding: 20px;
+            border-top: 1px solid var(--border-color);
             display: flex;
             justify-content: space-between;
+            background-color: #f9f9f9;
         }
+        
         .product-card {
-            border: 1px solid #eee;
-            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
             padding: 15px;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
             display: flex;
             align-items: center;
+            transition: transform 0.3s, box-shadow 0.3s;
         }
+        
+        .product-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+        }
+        
         .product-image {
-            width: 80px;
-            height: 80px;
+            width: 120px;
+            height: 120px;
             background-color: #f9f9f9;
-            border-radius: 4px;
-            margin-left: 15px;
+            border-radius: 8px;
+            margin-right: 20px;
             display: flex;
             align-items: center;
             justify-content: center;
             overflow: hidden;
             flex-shrink: 0;
         }
+        
         .product-image img {
             max-width: 100%;
             max-height: 100%;
             object-fit: contain;
         }
+        
         .product-details {
             flex: 1;
         }
+        
         .product-name {
             font-weight: 600;
             margin-bottom: 5px;
+            font-size: 16px;
         }
-        .product-price {
-            color: #2a5bd7;
-            font-weight: 600;
+        
+        .product-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
             margin-bottom: 10px;
+            font-size: 13px;
+            color: var(--light-text);
         }
+        
+        .product-meta span {
+            display: flex;
+            align-items: center;
+        }
+        
+        .product-meta i {
+            margin-right: 5px;
+            color: var(--primary-color);
+            font-size: 12px;
+        }
+        
+        .product-price {
+            color: var(--primary-color);
+            font-weight: 600;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+        
         .product-actions {
             display: flex;
             align-items: center;
             justify-content: space-between;
         }
+        
         .quantity-control {
             display: flex;
             align-items: center;
+            background-color: #f5f5f5;
+            border-radius: 8px;
+            overflow: hidden;
         }
+        
         .quantity-btn {
-            width: 30px;
-            height: 30px;
-            background-color: #f0f0f0;
+            width: 36px;
+            height: 36px;
+            background-color: var(--secondary-color);
             border: none;
             font-size: 16px;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            border-radius: 4px;
+            color: var(--text-color);
         }
+        
         .quantity-btn:hover {
             background-color: #e0e0e0;
         }
+        
         .quantity-input {
-            width: 40px;
+            width: 50px;
             text-align: center;
-            margin: 0 5px;
-            border: 1px solid #ddd;
+            border: none;
             padding: 5px;
-            border-radius: 4px;
+            font-size: 15px;
+            background-color: white;
+            border-top: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-color);
         }
+        
         .cart-item {
             display: flex;
             justify-content: space-between;
-            padding: 10px 0;
-            border-bottom: 1px solid #eee;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border-color);
+            align-items: center;
         }
+        
         .cart-item-details {
             flex: 1;
         }
+        
         .cart-item-name {
             font-weight: 500;
+            margin-bottom: 3px;
         }
-        .cart-item-variant {
-            color: #777;
+        
+        .cart-item-meta {
             font-size: 13px;
+            color: var(--light-text);
         }
+        
         .cart-item-price {
-            font-weight: 500;
+            font-weight: 600;
+            min-width: 80px;
+            text-align: right;
         }
+        
         .order-total {
             padding: 15px 0;
             font-weight: 600;
-            font-size: 16px;
+            font-size: 18px;
             display: flex;
             justify-content: space-between;
-            border-top: 1px solid #eee;
+            border-top: 1px solid var(--border-color);
             margin-top: 10px;
         }
+        
         .section-title {
             font-weight: 600;
-            margin: 20px 0 10px;
-            color: #444;
-        }
-        .placeholder-image {
-            width: 100%;
-            height: 100%;
-            background-color: #eee;
+            margin: 25px 0 15px;
+            color: var(--text-color);
+            font-size: 18px;
             display: flex;
             align-items: center;
-            justify-content: center;
-            color: #999;
-            font-size: 12px;
         }
-        .customer-list {
-            max-height: 200px;
-            overflow-y: auto;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            margin-top: 10px;
-            display: none;
+        
+        .section-title i {
+            margin-right: 10px;
+            color: var(--primary-color);
         }
-        .customer-item {
-            padding: 10px 15px;
-            border-bottom: 1px solid #eee;
-            cursor: pointer;
-        }
-        .customer-item:hover {
-            background-color: #f5f5f5;
-        }
-        .product-list {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 15px;
-        }
+        
         .no-results {
             text-align: center;
-            padding: 20px;
-            color: #777;
+            padding: 30px 20px;
+            color: var(--light-text);
+            font-size: 15px;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 30px 20px;
+            color: var(--light-text);
+        }
+        
+        .loading i {
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+        
+        .error-message {
+            color: var(--error-color);
+            margin-top: 10px;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .error-message i {
+            margin-right: 5px;
+        }
+        
+        .success-message {
+            color: var(--success-color);
+            margin-top: 10px;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .success-message i {
+            margin-right: 5px;
+        }
+        
+        .customer-select {
+            appearance: none;
+            padding-right: 40px;
+        }
+        
+        .customer-search-container {
+            position: relative;
+        }
+        
+        .customer-search-input {
+            padding-left: 40px;
+            width: 100%;
+        }
+        
+        .customer-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: white;
+            z-index: 10;
+            display: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .customer-dropdown-item {
+            padding: 10px 15px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .customer-dropdown-item:hover {
+            background-color: #f5f5f5;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Responsive styles */
+        @media (max-width: 768px) {
+            .wizard-step {
+                font-size: 12px;
+                padding: 12px 5px;
+            }
+            
+            .wizard-content {
+                padding: 20px;
+            }
+            
+            .product-card {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .product-image {
+                width: 100%;
+                height: 180px;
+                margin-right: 0;
+                margin-bottom: 15px;
+            }
+            
+            .product-actions {
+                width: 100%;
+            }
+            
+            .btn {
+                padding: 10px 15px;
+                font-size: 14px;
+            }
+            
+            .wizard-footer {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .btn-secondary {
+                order: 1;
+            }
+            
+            .btn-primary {
+                order: 2;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .wizard-step {
+                font-size: 11px;
+                padding: 10px 3px;
+            }
         }
     </style>
 </head>
 <body>
     <div class="wizard-container">
         <div class="wizard-header">
-            <div class="wizard-title">نظام الطلبات</div>
+            <div class="wizard-title">Order Wizard</div>
         </div>
         
         <ul class="wizard-steps">
-            <li class="wizard-step active">1. اختيار الزبون</li>
-            <li class="wizard-step">2. اختيار المنتجات</li>
-            <li class="wizard-step">3. تأكيد الطلب</li>
+            <li class="wizard-step active">1. Customer</li>
+            <li class="wizard-step">2. Products</li>
+            <li class="wizard-step">3. Review</li>
         </ul>
         
         <div class="wizard-content">
-            <!-- الخطوة 1: اختيار الزبون -->
+            <!-- Step 1: Select Customer -->
             <div id="step1" class="wizard-step-content" style="display: block;">
                 <div class="form-group">
-                    <label class="form-label">ابحث عن الزبون</label>
-                    <input type="text" class="form-control search-input" id="customerSearch" placeholder="اكتب اسم الزبون...">
-                    <span class="search-icon">🔍</span>
-                    <div class="customer-list" id="customerList">
-                        <div class="customer-item" data-id="1">محمد أحمد</div>
-                        <div class="customer-item" data-id="2">علي محمود</div>
-                        <div class="customer-item" data-id="3">سامي خالد</div>
-                        <div class="customer-item" data-id="4">نورا حسن</div>
-                        <div class="customer-item" data-id="5">ريم عبدالله</div>
+                    <label class="form-label">Select Customer</label>
+                    <div class="customer-search-container">
+                        <input type="text" class="form-control customer-search-input" id="customerSearch" placeholder="Search customers...">
+                        <span class="search-icon"><i class="fas fa-search"></i></span>
+                        <div class="customer-dropdown" id="customerDropdown">
+                            <!-- Customers will be loaded here -->
+                            <div class="customer-dropdown-item" data-id="1">Customer One</div>
+                            <div class="customer-dropdown-item" data-id="2">Customer Two</div>
+                            <div class="customer-dropdown-item" data-id="3">Customer Three</div>
+                            <div class="customer-dropdown-item" data-id="4">Customer Four</div>
+                        </div>
+                    </div>
+                    <div class="error-message" id="customerError" style="display: none;">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <span>Please select a customer</span>
                     </div>
                 </div>
-                <button class="btn btn-add">إضافة زبون جديد</button>
+                <button class="btn btn-add" id="addCustomerBtn" onclick="window.open('https://creatorapp.zoho.com/hishammanager_qutteneh/sales-rep-product-catalog-and-order-management/#Form:Customer', '_blank')">
+                    <i class="fas fa-plus"></i> Add New Customer
+                </button>
             </div>
             
-            <!-- الخطوة 2: اختيار المنتجات -->
+            <!-- Step 2: Select Products -->
             <div id="step2" class="wizard-step-content" style="display: none;">
                 <div class="form-group">
-                    <label class="form-label">ابحث عن المنتجات</label>
-                    <input type="text" class="form-control search-input" id="productSearch" placeholder="اكتب اسم المنتج...">
-                    <span class="search-icon">🔍</span>
+                    <label class="form-label">Search Products</label>
+                    <div style="position: relative;">
+                        <input type="text" class="form-control search-input" id="productSearch" placeholder="Search by product name or brand...">
+                        <span class="search-icon"><i class="fas fa-search"></i></span>
+                    </div>
+                    <div class="error-message" id="productError" style="display: none;"></div>
                 </div>
                 
                 <div class="product-list" id="productList">
-                    <div class="product-card">
-                        <div class="product-image">
-                            <div class="placeholder-image">صورة المنتج</div>
-                        </div>
-                        <div class="product-details">
-                            <div class="product-name">ريكسا</div>
-                            <div class="product-price">5.00 $</div>
-                            <div class="product-actions">
-                                <div class="quantity-control">
-                                    <button class="quantity-btn minus-btn">-</button>
-                                    <input type="text" class="quantity-input" value="1" min="1">
-                                    <button class="quantity-btn plus-btn">+</button>
-                                </div>
-                                <button class="btn btn-primary add-to-cart-btn">أضف للسلة</button>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="product-card">
-                        <div class="product-image">
-                            <div class="placeholder-image">صورة المنتج</div>
-                        </div>
-                        <div class="product-details">
-                            <div class="product-name">مزيل عرق ريكسا</div>
-                            <div class="product-price">5.00 $</div>
-                            <div class="product-actions">
-                                <div class="quantity-control">
-                                    <button class="quantity-btn minus-btn">-</button>
-                                    <input type="text" class="quantity-input" value="1" min="1">
-                                    <button class="quantity-btn plus-btn">+</button>
-                                </div>
-                                <button class="btn btn-primary add-to-cart-btn">أضف للسلة</button>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="product-card">
-                        <div class="product-image">
-                            <div class="placeholder-image">صورة المنتج</div>
-                        </div>
-                        <div class="product-details">
-                            <div class="product-name">معجون أسنان أكوا</div>
-                            <div class="product-price">2.50 $</div>
-                            <div class="product-actions">
-                                <div class="quantity-control">
-                                    <button class="quantity-btn minus-btn">-</button>
-                                    <input type="text" class="quantity-input" value="1" min="1">
-                                    <button class="quantity-btn plus-btn">+</button>
-                                </div>
-                                <button class="btn btn-primary add-to-cart-btn">أضف للسلة</button>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="product-card">
-                        <div class="product-image">
-                            <div class="placeholder-image">صورة المنتج</div>
-                        </div>
-                        <div class="product-details">
-                            <div class="product-name">معجون أسنان سيلفر</div>
-                            <div class="product-price">3.00 $</div>
-                            <div class="product-actions">
-                                <div class="quantity-control">
-                                    <button class="quantity-btn minus-btn">-</button>
-                                    <input type="text" class="quantity-input" value="1" min="1">
-                                    <button class="quantity-btn plus-btn">+</button>
-                                </div>
-                                <button class="btn btn-primary add-to-cart-btn">أضف للسلة</button>
-                            </div>
-                        </div>
+                    <div class="loading">
+                        <i class="fas fa-spinner"></i> Loading products...
                     </div>
                 </div>
             </div>
             
-            <!-- الخطوة 3: تأكيد الطلب -->
+            <!-- Step 3: Review Order -->
             <div id="step3" class="wizard-step-content" style="display: none;">
-                <div class="cart-item">
-                    <div class="cart-item-details">
-                        <div class="cart-item-name">ريكسا رول أون</div>
-                        <div class="cart-item-variant">شاور كلين (و) وحدة</div>
+                <div id="orderItems">
+                    <div class="loading">
+                        <i class="fas fa-spinner"></i> Loading order details...
                     </div>
-                    <div class="cart-item-price">2.10 $</div>
-                </div>
-                
-                <div class="cart-item">
-                    <div class="cart-item-details">
-                        <div class="cart-item-name">ريكسا رول أون</div>
-                        <div class="cart-item-variant">بودرة جافة (و) وحدة</div>
-                    </div>
-                    <div class="cart-item-price">1.05 $</div>
                 </div>
                 
                 <div class="order-total">
-                    <span>المجموع الكلي</span>
-                    <span>3.15 $</span>
+                    <span>Order Total</span>
+                    <span id="orderTotal">$0.00</span>
                 </div>
+                
+                <div class="success-message" id="orderSuccess" style="display: none;">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Order submitted successfully!</span>
+                </div>
+                
+                <div class="error-message" id="orderError" style="display: none;"></div>
             </div>
         </div>
         
         <div class="wizard-footer">
-            <button class="btn btn-primary" id="nextBtn">التالي</button>
-            <button class="btn btn-secondary" id="prevBtn" disabled>السابق</button>
+            <button class="btn btn-secondary" id="prevBtn" disabled>
+                <i class="fas fa-arrow-left"></i> Previous
+            </button>
+            <button class="btn btn-primary" id="nextBtn">
+                Next <i class="fas fa-arrow-right"></i>
+            </button>
         </div>
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Sample data - Replace with your actual data or API calls
+            const sampleCustomers = [
+                { id: 1, name: 'Customer One' },
+                { id: 2, name: 'Customer Two' },
+                { id: 3, name: 'Customer Three' },
+                { id: 4, name: 'Customer Four' }
+            ];
+
+            const sampleProducts = [
+                { 
+                    id: 1, 
+                    name: 'REXONA DEO 200ML XTRA COOL (M)',
+                    brand: 'REXONA',
+                    origin: 'ARGENTINA',
+                    sku: '7791293046648',
+                    price: 1.60,
+                    description: '48H protection, Deco Spray'
+                },
+                { 
+                    id: 2, 
+                    name: 'Product Two',
+                    brand: 'Brand B',
+                    origin: 'USA',
+                    sku: '123456789',
+                    price: 2.50,
+                    description: 'Product description'
+                }
+            ];
+
+            // Configuration
+            const config = {
+                currentCustomer: null,
+                cartItems: []
+            };
+
+            // DOM Elements
             const stepContents = document.querySelectorAll('.wizard-step-content');
             const steps = document.querySelectorAll('.wizard-step');
             const prevBtn = document.getElementById('prevBtn');
             const nextBtn = document.getElementById('nextBtn');
-            let currentStep = 0;
-            
-            // بيانات الزبائن
-            const customers = [
-                { id: 1, name: 'محمد أحمد' },
-                { id: 2, name: 'علي محمود' },
-                { id: 3, name: 'سامي خالد' },
-                { id: 4, name: 'نورا حسن' },
-                { id: 5, name: 'ريم عبدالله' }
-            ];
-            
-            // بيانات المنتجات
-            const products = [
-                { id: 1, name: 'ريكسا', price: 5.00, category: 'العناية الشخصية' },
-                { id: 2, name: 'مزيل عرق ريكسا', price: 5.00, category: 'العناية الشخصية' },
-                { id: 3, name: 'معجون أسنان أكوا', price: 2.50, category: 'العناية بالأسنان' },
-                { id: 4, name: 'معجون أسنان سيلفر', price: 3.00, category: 'العناية بالأسنان' }
-            ];
-            
-            // البحث عن الزبائن
             const customerSearch = document.getElementById('customerSearch');
-            const customerList = document.getElementById('customerList');
-            
-            customerSearch.addEventListener('focus', function() {
-                customerList.style.display = 'block';
-            });
-            
-            customerSearch.addEventListener('input', function() {
-                const searchTerm = this.value.toLowerCase();
-                const customerItems = customerList.querySelectorAll('.customer-item');
-                
-                customerItems.forEach(item => {
-                    const customerName = item.textContent.toLowerCase();
-                    if (customerName.includes(searchTerm)) {
-                        item.style.display = 'block';
-                    } else {
-                        item.style.display = 'none';
-                    }
-                });
-            });
-            
-            // اختيار زبون من القائمة
-            customerList.addEventListener('click', function(e) {
-                if (e.target.classList.contains('customer-item')) {
-                    customerSearch.value = e.target.textContent;
-                    customerList.style.display = 'none';
-                }
-            });
-            
-            // البحث عن المنتجات
+            const customerDropdown = document.getElementById('customerDropdown');
+            const customerError = document.getElementById('customerError');
             const productSearch = document.getElementById('productSearch');
             const productList = document.getElementById('productList');
-            const productCards = productList.querySelectorAll('.product-card');
+            const productError = document.getElementById('productError');
+            const orderItems = document.getElementById('orderItems');
+            const orderTotal = document.getElementById('orderTotal');
+            const orderSuccess = document.getElementById('orderSuccess');
+            const orderError = document.getElementById('orderError');
+            let currentStep = 0;
             
-            productSearch.addEventListener('input', function() {
-                const searchTerm = this.value.toLowerCase();
-                let hasResults = false;
+            // Initialize the form
+            initForm();
+            
+            function initForm() {
+                // Load sample customers (replace with API call)
+                loadCustomers(sampleCustomers);
                 
-                productCards.forEach(card => {
-                    const productName = card.querySelector('.product-name').textContent.toLowerCase();
-                    if (productName.includes(searchTerm)) {
-                        card.style.display = 'flex';
-                        hasResults = true;
-                    } else {
-                        card.style.display = 'none';
-                    }
-                });
+                // Set up event listeners
+                setupEventListeners();
                 
-                // إظهار رسالة عندما لا توجد نتائج
-                const noResults = productList.querySelector('.no-results');
-                if (!hasResults) {
-                    if (!noResults) {
-                        const noResultsDiv = document.createElement('div');
-                        noResultsDiv.className = 'no-results';
-                        noResultsDiv.textContent = 'لا توجد منتجات مطابقة للبحث';
-                        productList.appendChild(noResultsDiv);
-                    }
-                } else if (noResults) {
-                    noResults.remove();
+                // Initialize step display
+                showStep(currentStep);
+            }
+            
+            function loadCustomers(customers) {
+                customerDropdown.innerHTML = '';
+                
+                if (customers && customers.length > 0) {
+                    customers.forEach(customer => {
+                        const item = document.createElement('div');
+                        item.className = 'customer-dropdown-item';
+                        item.textContent = customer.name;
+                        item.dataset.id = customer.id;
+                        customerDropdown.appendChild(item);
+                    });
+                } else {
+                    customerDropdown.innerHTML = '<div class="no-results">No customers found</div>';
                 }
-            });
+            }
             
-            // التحكم في الكمية
-            document.querySelectorAll('.plus-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const input = this.parentElement.querySelector('.quantity-input');
-                    input.value = parseInt(input.value) + 1;
+            function loadProducts() {
+                // Simulate loading (replace with API call)
+                setTimeout(() => {
+                    productList.innerHTML = '';
+                    
+                    if (sampleProducts && sampleProducts.length > 0) {
+                        sampleProducts.forEach(product => {
+                            const card = document.createElement('div');
+                            card.className = 'product-card';
+                            card.dataset.id = product.id;
+                            card.dataset.name = product.name;
+                            card.dataset.brand = product.brand;
+                            card.dataset.origin = product.origin;
+                            card.dataset.sku = product.sku;
+                            
+                            card.innerHTML = `
+                                <div class="product-image">
+                                    <div class="placeholder-image"><i class="fas fa-box-open"></i></div>
+                                </div>
+                                <div class="product-details">
+                                    <div class="product-name">${product.name}</div>
+                                    
+                                    <div class="product-meta">
+                                        <span><i class="fas fa-tag"></i> ${product.brand}</span>
+                                        <span><i class="fas fa-globe"></i> ${product.origin}</span>
+                                        <span><i class="fas fa-barcode"></i> ${product.sku}</span>
+                                    </div>
+                                    
+                                    <div class="product-meta">
+                                        <span>${product.description}</span>
+                                    </div>
+                                    
+                                    <div class="product-price">$${(product.price || 0).toFixed(2)}</div>
+                                    
+                                    <div class="product-actions">
+                                        <div class="quantity-control">
+                                            <button class="quantity-btn minus-btn"><i class="fas fa-minus"></i></button>
+                                            <input type="number" class="quantity-input" value="1" min="1">
+                                            <button class="quantity-btn plus-btn"><i class="fas fa-plus"></i></button>
+                                        </div>
+                                        <button class="btn btn-primary add-to-cart-btn">
+                                            <i class="fas fa-cart-plus"></i> Add
+                                        </button>
+                                    </div>
+                                </div>
+                            `;
+                            
+                            productList.appendChild(card);
+                        });
+                    } else {
+                        productList.innerHTML = '<div class="no-results"><i class="fas fa-search"></i> No products found</div>';
+                    }
+                }, 500); // Simulate network delay
+            }
+            
+            function submitOrder() {
+                if (!config.currentCustomer) {
+                    showError(orderError, 'Please select a customer first');
+                    return false;
+                }
+                
+                if (config.cartItems.length === 0) {
+                    showError(orderError, 'Please add at least one product to the order');
+                    return false;
+                }
+                
+                // Simulate order submission (replace with API call)
+                setTimeout(() => {
+                    orderSuccess.style.display = 'flex';
+                    orderError.style.display = 'none';
+                    
+                    // Reset form after 2 seconds
+                    setTimeout(resetForm, 2000);
+                }, 1000);
+                
+                return true;
+            }
+            
+            function calculateOrderTotal() {
+                return config.cartItems.reduce((total, item) => {
+                    return total + (item.price * item.quantity);
+                }, 0);
+            }
+            
+            function resetForm() {
+                // Reset customer selection
+                customerSearch.value = '';
+                config.currentCustomer = null;
+                customerDropdown.style.display = 'none';
+                
+                // Clear cart
+                config.cartItems = [];
+                
+                // Reset to first step
+                currentStep = 0;
+                showStep(currentStep);
+                
+                // Hide success message
+                orderSuccess.style.display = 'none';
+            }
+            
+            // Form Functions
+            function setupEventListeners() {
+                // Customer search and selection
+                customerSearch.addEventListener('focus', function() {
+                    customerDropdown.style.display = 'block';
                 });
-            });
-            
-            document.querySelectorAll('.minus-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const input = this.parentElement.querySelector('.quantity-input');
-                    if (parseInt(input.value) > 1) {
-                        input.value = parseInt(input.value) - 1;
+                
+                customerSearch.addEventListener('blur', function() {
+                    // Hide dropdown after a short delay to allow click
+                    setTimeout(() => {
+                        customerDropdown.style.display = 'none';
+                    }, 200);
+                });
+                
+                customerSearch.addEventListener('input', function() {
+                    const searchTerm = this.value.toLowerCase();
+                    const customerItems = customerDropdown.querySelectorAll('.customer-dropdown-item');
+                    
+                    customerItems.forEach(item => {
+                        const customerName = item.textContent.toLowerCase();
+                        if (customerName.includes(searchTerm)) {
+                            item.style.display = 'block';
+                        } else {
+                            item.style.display = 'none';
+                        }
+                    });
+                });
+                
+                // Select customer from dropdown
+                customerDropdown.addEventListener('click', function(e) {
+                    if (e.target.classList.contains('customer-dropdown-item')) {
+                        config.currentCustomer = e.target.dataset.id;
+                        customerSearch.value = e.target.textContent;
+                        hideError(customerError);
                     }
                 });
-            });
-            
-            // إضافة إلى السلة
-            document.querySelectorAll('.add-to-cart-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const productCard = this.closest('.product-card');
-                    const productName = productCard.querySelector('.product-name').textContent;
-                    const productPrice = productCard.querySelector('.product-price').textContent;
-                    const quantity = productCard.querySelector('.quantity-input').value;
+                
+                // Product search
+                productSearch.addEventListener('input', function() {
+                    const searchTerm = this.value.toLowerCase();
+                    const productCards = productList.querySelectorAll('.product-card');
+                    let hasResults = false;
                     
-                    alert(`تمت الإضافة إلى السلة: ${productName} (${quantity} x ${productPrice})`);
+                    productCards.forEach(card => {
+                        const productName = card.dataset.name.toLowerCase();
+                        const productBrand = card.dataset.brand.toLowerCase();
+                        
+                        if (productName.includes(searchTerm) || productBrand.includes(searchTerm)) {
+                            card.style.display = 'flex';
+                            hasResults = true;
+                        } else {
+                            card.style.display = 'none';
+                        }
+                    });
+                    
+                    // Show message when no results
+                    const noResults = productList.querySelector('.no-results');
+                    if (!hasResults && productCards.length > 0) {
+                        if (!noResults) {
+                            const noResultsDiv = document.createElement('div');
+                            noResultsDiv.className = 'no-results';
+                            noResultsDiv.innerHTML = '<i class="fas fa-search"></i> No products matching your search';
+                            productList.appendChild(noResultsDiv);
+                        }
+                    } else if (noResults) {
+                        noResults.remove();
+                    }
                 });
-            });
+                
+                // Quantity controls and add to cart (delegated events)
+                productList.addEventListener('click', function(e) {
+                    if (e.target.classList.contains('plus-btn') || e.target.closest('.plus-btn')) {
+                        const btn = e.target.classList.contains('plus-btn') ? e.target : e.target.closest('.plus-btn');
+                        const input = btn.parentElement.querySelector('.quantity-input');
+                        input.value = parseInt(input.value) + 1;
+                    }
+                    
+                    if (e.target.classList.contains('minus-btn') || e.target.closest('.minus-btn')) {
+                        const btn = e.target.classList.contains('minus-btn') ? e.target : e.target.closest('.minus-btn');
+                        const input = btn.parentElement.querySelector('.quantity-input');
+                        if (parseInt(input.value) > 1) {
+                            input.value = parseInt(input.value) - 1;
+                        }
+                    }
+                    
+                    if (e.target.classList.contains('add-to-cart-btn') || e.target.closest('.add-to-cart-btn')) {
+                        const btn = e.target.classList.contains('add-to-cart-btn') ? e.target : e.target.closest('.add-to-cart-btn');
+                        const productCard = btn.closest('.product-card');
+                        const productId = productCard.dataset.id;
+                        const productName = productCard.dataset.name;
+                        const productPrice = parseFloat(productCard.querySelector('.product-price').textContent.replace('$', ''));
+                        const quantity = parseInt(productCard.querySelector('.quantity-input').value);
+                        
+                        // Add to cart
+                        config.cartItems.push({
+                            productId,
+                            productName,
+                            price: productPrice,
+                            quantity
+                        });
+                        
+                        // Reset quantity
+                        productCard.querySelector('.quantity-input').value = 1;
+                        
+                        // Show confirmation
+                        showTempMessage(productCard, `<i class="fas fa-check"></i> Added ${quantity} x ${productName}`);
+                    }
+                });
+                
+                // Navigation buttons
+                nextBtn.addEventListener('click', async function() {
+                    if (currentStep === 0) {
+                        // Validate customer selection
+                        if (!customerSearch.value || !config.currentCustomer) {
+                            showError(customerError, 'Please select a customer');
+                            return;
+                        }
+                        
+                        // Moving to products step - load products
+                        loadProducts();
+                        currentStep++;
+                        showStep(currentStep);
+                    } else if (currentStep === 1) {
+                        // Moving to review step - update order summary
+                        updateOrderSummary();
+                        currentStep++;
+                        showStep(currentStep);
+                    } else {
+                        // Submit order
+                        submitOrder();
+                    }
+                });
+                
+                prevBtn.addEventListener('click', function() {
+                    if (currentStep > 0) {
+                        currentStep--;
+                        showStep(currentStep);
+                    }
+                });
+            }
             
-            // التنقل بين الخطوات
+            function updateOrderSummary() {
+                orderItems.innerHTML = '';
+                
+                if (config.cartItems.length === 0) {
+                    orderItems.innerHTML = '<div class="no-results"><i class="fas fa-shopping-cart"></i> No items in cart</div>';
+                    orderTotal.textContent = '$0.00';
+                    return;
+                }
+                
+                let total = 0;
+                
+                config.cartItems.forEach(item => {
+                    const itemTotal = item.price * item.quantity;
+                    total += itemTotal;
+                    
+                    const itemElement = document.createElement('div');
+                    itemElement.className = 'cart-item';
+                    itemElement.innerHTML = `
+                        <div class="cart-item-details">
+                            <div class="cart-item-name">${item.productName}</div>
+                            <div class="cart-item-meta">Quantity: ${item.quantity} × $${item.price.toFixed(2)}</div>
+                        </div>
+                        <div class="cart-item-price">$${(itemTotal).toFixed(2)}</div>
+                    `;
+                    
+                    orderItems.appendChild(itemElement);
+                });
+                
+                orderTotal.textContent = `$${total.toFixed(2)}`;
+            }
+            
             function showStep(stepIndex) {
                 stepContents.forEach((content, index) => {
                     content.style.display = index === stepIndex ? 'block' : 'none';
@@ -544,35 +965,39 @@
                 });
                 
                 prevBtn.disabled = stepIndex === 0;
-                nextBtn.textContent = stepIndex === stepContents.length - 1 ? 'تأكيد الطلب' : 'التالي';
             }
             
-            nextBtn.addEventListener('click', function() {
-                if (currentStep < stepContents.length - 1) {
-                    currentStep++;
-                    showStep(currentStep);
-                } else {
-                    // إرسال الطلب
-                    alert('تم تأكيد الطلب بنجاح!');
-                }
-            });
+            function showError(element, message) {
+                element.style.display = 'flex';
+                element.querySelector('span').textContent = message;
+            }
             
-            prevBtn.addEventListener('click', function() {
-                if (currentStep > 0) {
-                    currentStep--;
-                    showStep(currentStep);
-                }
-            });
+            function hideError(element) {
+                element.style.display = 'none';
+            }
             
-            // تهيئة الواجهة
-            showStep(0);
+            function showTempMessage(element, message) {
+                const msg = document.createElement('div');
+                msg.className = 'success-message';
+                msg.style.position = 'absolute';
+                msg.style.bottom = '10px';
+                msg.style.left = '10px';
+                msg.style.right = '10px';
+                msg.style.backgroundColor = 'rgba(56, 142, 60, 0.9)';
+                msg.style.color = 'white';
+                msg.style.padding = '8px 12px';
+                msg.style.borderRadius = '4px';
+                msg.style.zIndex = '10';
+                msg.innerHTML = message;
+                
+                element.style.position = 'relative';
+                element.appendChild(msg);
+                
+                setTimeout(() => {
+                    msg.remove();
+                }, 2000);
+            }
         });
-         document.addEventListener('DOMContentLoaded', function() {
-    var btn = document.getElementById('btnAddCustomer');
-    btn.addEventListener('click', function() {
-      window.location.href = 'https://creatorapp.zoho.com/hishammanager_qutteneh/sales-rep-product-catalog-and-order-management/#Form:Customer';
-    });
-  });
     </script>
 </body>
 </html>
