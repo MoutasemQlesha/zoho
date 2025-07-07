@@ -525,7 +525,7 @@
                     <label class="form-label">Select Customer</label>
                     <div class="customer-search-container">
                         <input type="text" class="form-control customer-search-input" id="customerSearch" placeholder="Search customers...">
-                        <span class="search-icon"><i class="fas fa-search"></i></span>
+                       
                         <div class="customer-dropdown" id="customerDropdown">
                             <!-- Customers will be loaded here -->
                             <div class="customer-dropdown-item" data-id="1">Customer One</div>
@@ -550,7 +550,7 @@
                     <label class="form-label">Search Products</label>
                     <div style="position: relative;">
                         <input type="text" class="form-control search-input" id="productSearch" placeholder="Search by product name or brand...">
-                        <span class="search-icon"><i class="fas fa-search"></i></span>
+                       
                     </div>
                     <div class="error-message" id="productError" style="display: none;"></div>
                 </div>
@@ -572,7 +572,7 @@
                 
                 <div class="order-total">
                     <span>Order Total</span>
-                    <span id="orderTotal">$0.00</span>
+                    <span id="orderTotal">JD 0.00</span>
                 </div>
                 
                 <div class="success-message" id="orderSuccess" style="display: none;">
@@ -925,7 +925,7 @@
                 
                 if (config.cartItems.length === 0) {
                     orderItems.innerHTML = '<div class="no-results"><i class="fas fa-shopping-cart"></i> No items in cart</div>';
-                    orderTotal.textContent = '$0.00';
+                    orderTotal.textContent = 'JD 0.00';
                     return;
                 }
                 
