@@ -14,6 +14,7 @@
             --border-color: #ddd;
             --error-color: #d32f2f;
             --success-color: #388e3c;
+            --jd-color: #00a65a;
         }
         
         * {
@@ -42,12 +43,13 @@
             padding: 20px;
             border-bottom: 1px solid var(--border-color);
             text-align: center;
+            background-color: var(--primary-color);
+            color: white;
         }
         
         .wizard-title {
             font-size: 22px;
             font-weight: 600;
-            color: var(--primary-color);
         }
         
         .wizard-steps {
@@ -266,10 +268,14 @@
         }
         
         .product-price {
-            color: var(--primary-color);
+            color: var(--jd-color);
             font-weight: 600;
             margin-bottom: 15px;
             font-size: 18px;
+        }
+        
+        .product-price:before {
+            content: "JD ";
         }
         
         .product-actions {
@@ -340,6 +346,11 @@
             font-weight: 600;
             min-width: 80px;
             text-align: right;
+            color: var(--jd-color);
+        }
+        
+        .cart-item-price:before {
+            content: "JD ";
         }
         
         .order-total {
@@ -350,6 +361,11 @@
             justify-content: space-between;
             border-top: 1px solid var(--border-color);
             margin-top: 10px;
+            color: var(--jd-color);
+        }
+        
+        .order-total span:first-child {
+            color: var(--text-color);
         }
         
         .section-title {
@@ -415,11 +431,6 @@
         
         .customer-search-container {
             position: relative;
-        }
-        
-        .customer-search-input {
-            padding-left: 40px;
-            width: 100%;
         }
         
         .customer-dropdown {
@@ -509,29 +520,37 @@
 <body>
     <div class="wizard-container">
         <div class="wizard-header">
-            <div class="wizard-title">Order Wizard</div>
+            <div class="wizard-title">
+                <i class="fas fa-shopping-cart"></i> Order Management System
+            </div>
         </div>
         
         <ul class="wizard-steps">
-            <li class="wizard-step active">1. Customer</li>
-            <li class="wizard-step">2. Products</li>
-            <li class="wizard-step">3. Review</li>
+            <li class="wizard-step active">
+                <i class="fas fa-user"></i> 1. Customer
+            </li>
+            <li class="wizard-step">
+                <i class="fas fa-box-open"></i> 2. Products
+            </li>
+            <li class="wizard-step">
+                <i class="fas fa-check-circle"></i> 3. Review
+            </li>
         </ul>
         
         <div class="wizard-content">
             <!-- Step 1: Select Customer -->
             <div id="step1" class="wizard-step-content" style="display: block;">
                 <div class="form-group">
-                    <label class="form-label">Select Customer</label>
+                    <label class="form-label">
+                        <i class="fas fa-search"></i> Search Customer
+                    </label>
                     <div class="customer-search-container">
-                        <input type="text" class="form-control customer-search-input" id="customerSearch" placeholder="Search customers...">
-                       
+                        <input type="text" class="form-control search-input" id="customerSearch" placeholder="Type customer name...">
+                        <span class="search-icon"><i class="fas fa-search"></i></span>
                         <div class="customer-dropdown" id="customerDropdown">
-                            <!-- Customers will be loaded here -->
-                            <div class="customer-dropdown-item" data-id="1">Customer One</div>
-                            <div class="customer-dropdown-item" data-id="2">Customer Two</div>
-                            <div class="customer-dropdown-item" data-id="3">Customer Three</div>
-                            <div class="customer-dropdown-item" data-id="4">Customer Four</div>
+                            <div class="loading">
+                                <i class="fas fa-spinner"></i> Loading customers...
+                            </div>
                         </div>
                     </div>
                     <div class="error-message" id="customerError" style="display: none;">
@@ -539,7 +558,19 @@
                         <span>Please select a customer</span>
                     </div>
                 </div>
-                <button class="btn btn-add" id="addCustomerBtn" onclick="window.open('https://creatorapp.zoho.com/hishammanager_qutteneh/sales-rep-product-catalog-and-order-management/#Form:Customer', '_blank')">
+                
+                <div class="form-group" id="customerInfo" style="display: none;">
+                    <div class="form-group">
+                        <label>Contact Number</label>
+                        <input type="text" id="customerPhone" class="form-control" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label>Store Name</label>
+                        <input type="text" id="storeName" class="form-control" readonly>
+                    </div>
+                </div>
+                
+                <button class="btn btn-add" id="addCustomerBtn">
                     <i class="fas fa-plus"></i> Add New Customer
                 </button>
             </div>
@@ -547,10 +578,12 @@
             <!-- Step 2: Select Products -->
             <div id="step2" class="wizard-step-content" style="display: none;">
                 <div class="form-group">
-                    <label class="form-label">Search Products</label>
+                    <label class="form-label">
+                        <i class="fas fa-search"></i> Search Products
+                    </label>
                     <div style="position: relative;">
                         <input type="text" class="form-control search-input" id="productSearch" placeholder="Search by product name or brand...">
-                       
+                        <span class="search-icon"><i class="fas fa-search"></i></span>
                     </div>
                     <div class="error-message" id="productError" style="display: none;"></div>
                 </div>
@@ -564,14 +597,29 @@
             
             <!-- Step 3: Review Order -->
             <div id="step3" class="wizard-step-content" style="display: none;">
-                <div id="orderItems">
-                    <div class="loading">
-                        <i class="fas fa-spinner"></i> Loading order details...
-                    </div>
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-user"></i> Customer Information
+                    </label>
+                    <div id="orderCustomerInfo"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-boxes"></i> Order Items
+                    </label>
+                    <div id="orderItems"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-edit"></i> Delivery Notes
+                    </label>
+                    <textarea id="deliveryNotes" class="form-control" rows="3"></textarea>
                 </div>
                 
                 <div class="order-total">
-                    <span>Order Total</span>
+                    <span>Order Total:</span>
                     <span id="orderTotal">JD 0.00</span>
                 </div>
                 
@@ -596,39 +644,27 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Sample data - Replace with your actual data or API calls
-            const sampleCustomers = [
-                { id: 1, name: 'Customer One' },
-                { id: 2, name: 'Customer Two' },
-                { id: 3, name: 'Customer Three' },
-                { id: 4, name: 'Customer Four' }
-            ];
-
-            const sampleProducts = [
-                { 
-                    id: 1, 
-                    name: 'REXONA DEO 200ML XTRA COOL (M)',
-                    brand: 'REXONA',
-                    origin: 'ARGENTINA',
-                    sku: '7791293046648',
-                    price: 1.60,
-                    description: '48H protection, Deco Spray'
-                },
-                { 
-                    id: 2, 
-                    name: 'Product Two',
-                    brand: 'Brand B',
-                    origin: 'USA',
-                    sku: '123456789',
-                    price: 2.50,
-                    description: 'Product description'
-                }
-            ];
-
-            // Configuration
+            // Configuration - Replace with your actual Zoho Creator details
             const config = {
+                zoho: {
+                    accountsUrl: 'https://accounts.zoho.com',
+                    clientId: '1000.P810X5DJ8P6QYW03JMJ3HM4ePE9HIC',
+                    clientSecret: 'b49f6ad8e8a92d68eZvca58ec15a6773aef04cdf',
+                    refreshToken: '1080.6e53a6b597046f54af7979ace88d8e.d8ce44f382331d67f62de83b67276e8',
+                    
+                    // Your Zoho Creator app details
+                    portalName: 'hishammanager_qutteneh',
+                    appName: 'sales-rep-product-catalog-and-order-management',
+                    
+                    // Report and Form names
+                    customerReport: 'Customer_Report',
+                    productReport: 'Product_Report',
+                    orderForm: 'Order',
+                    orderItemForm: 'Order_Items'
+                },
                 currentCustomer: null,
-                cartItems: []
+                cartItems: [],
+                accessToken: null
             };
 
             // DOM Elements
@@ -638,79 +674,159 @@
             const nextBtn = document.getElementById('nextBtn');
             const customerSearch = document.getElementById('customerSearch');
             const customerDropdown = document.getElementById('customerDropdown');
-            const customerError = document.getElementById('customerError');
+            const customerInfo = document.getElementById('customerInfo');
+            const customerPhone = document.getElementById('customerPhone');
+            const storeName = document.getElementById('storeName');
             const productSearch = document.getElementById('productSearch');
             const productList = document.getElementById('productList');
-            const productError = document.getElementById('productError');
+            const orderCustomerInfo = document.getElementById('orderCustomerInfo');
             const orderItems = document.getElementById('orderItems');
             const orderTotal = document.getElementById('orderTotal');
+            const deliveryNotes = document.getElementById('deliveryNotes');
             const orderSuccess = document.getElementById('orderSuccess');
             const orderError = document.getElementById('orderError');
+            const customerError = document.getElementById('customerError');
+            const productError = document.getElementById('productError');
+            const addCustomerBtn = document.getElementById('addCustomerBtn');
+            
             let currentStep = 0;
             
             // Initialize the form
             initForm();
             
-            function initForm() {
-                // Load sample customers (replace with API call)
-                loadCustomers(sampleCustomers);
-                
-                // Set up event listeners
-                setupEventListeners();
-                
-                // Initialize step display
-                showStep(currentStep);
-            }
-            
-            function loadCustomers(customers) {
-                customerDropdown.innerHTML = '';
-                
-                if (customers && customers.length > 0) {
-                    customers.forEach(customer => {
-                        const item = document.createElement('div');
-                        item.className = 'customer-dropdown-item';
-                        item.textContent = customer.name;
-                        item.dataset.id = customer.id;
-                        customerDropdown.appendChild(item);
-                    });
-                } else {
-                    customerDropdown.innerHTML = '<div class="no-results">No customers found</div>';
+            async function initForm() {
+                try {
+                    // First get access token
+                    config.accessToken = await getZohoAccessToken();
+                    
+                    // Then load customers
+                    await loadCustomers();
+                    
+                    // Set up event listeners
+                    setupEventListeners();
+                    
+                    // Initialize step display
+                    showStep(currentStep);
+                } catch (error) {
+                    console.error('Initialization error:', error);
+                    showError(customerError, 'Failed to initialize form. Please refresh the page.');
                 }
             }
             
-            function loadProducts() {
-                // Simulate loading (replace with API call)
-                setTimeout(() => {
+            // Zoho API Functions
+            async function getZohoAccessToken() {
+                try {
+                    const response = await fetch(`${config.zoho.accountsUrl}/oauth/v2/token`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded'
+                        },
+                        body: new URLSearchParams({
+                            grant_type: 'refresh_token',
+                            client_id: config.zoho.clientId,
+                            client_secret: config.zoho.clientSecret,
+                            refresh_token: config.zoho.refreshToken
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    if (data.access_token) {
+                        return data.access_token;
+                    } else {
+                        throw new Error('Failed to get access token');
+                    }
+                } catch (error) {
+                    console.error('Error getting access token:', error);
+                    throw error;
+                }
+            }
+            
+            async function loadCustomers() {
+                try {
+                    customerDropdown.innerHTML = '<div class="loading"><i class="fas fa-spinner"></i> Loading customers...</div>';
+                    
+                    const response = await fetch(
+                        `https://creator.zoho.com/api/v2/${config.zoho.portalName}/${config.zoho.appName}/report/${config.zoho.customerReport}`,
+                        {
+                            headers: {
+                                'Authorization': `Zoho-oauthtoken ${config.accessToken}`
+                            }
+                        }
+                    );
+                    
+                    const data = await response.json();
+                    customerDropdown.innerHTML = '';
+                    
+                    if (data.data && data.data.length > 0) {
+                        data.data.forEach(customer => {
+                            const item = document.createElement('div');
+                            item.className = 'customer-dropdown-item';
+                            item.dataset.id = customer.ID;
+                            item.dataset.phone = customer.Contact_Number || '';
+                            item.dataset.store = customer.Store_Name || '';
+                            
+                            item.innerHTML = `
+                                <div><strong>${customer.Customer_Name || 'Unnamed Customer'}</strong></div>
+                                <div class="product-meta">
+                                    <span><i class="fas fa-phone"></i> ${customer.Contact_Number || 'N/A'}</span>
+                                    <span><i class="fas fa-store"></i> ${customer.Store_Name || 'N/A'}</span>
+                                </div>
+                            `;
+                            
+                            customerDropdown.appendChild(item);
+                        });
+                    } else {
+                        customerDropdown.innerHTML = '<div class="no-results"><i class="fas fa-search"></i> No customers found</div>';
+                    }
+                } catch (error) {
+                    console.error('Error loading customers:', error);
+                    customerDropdown.innerHTML = '<div class="error-message"><i class="fas fa-exclamation-circle"></i> Failed to load customers</div>';
+                }
+            }
+            
+            async function loadProducts() {
+                try {
+                    productList.innerHTML = '<div class="loading"><i class="fas fa-spinner"></i> Loading products...</div>';
+                    
+                    const response = await fetch(
+                        `https://creator.zoho.com/api/v2/${config.zoho.portalName}/${config.zoho.appName}/report/${config.zoho.productReport}`,
+                        {
+                            headers: {
+                                'Authorization': `Zoho-oauthtoken ${config.accessToken}`
+                            }
+                        }
+                    );
+                    
+                    const data = await response.json();
                     productList.innerHTML = '';
                     
-                    if (sampleProducts && sampleProducts.length > 0) {
-                        sampleProducts.forEach(product => {
+                    if (data.data && data.data.length > 0) {
+                        data.data.forEach(product => {
                             const card = document.createElement('div');
                             card.className = 'product-card';
-                            card.dataset.id = product.id;
-                            card.dataset.name = product.name;
-                            card.dataset.brand = product.brand;
-                            card.dataset.origin = product.origin;
-                            card.dataset.sku = product.sku;
+                            card.dataset.id = product.ID;
+                            card.dataset.name = product.Product_Name || 'Unnamed Product';
+                            card.dataset.brand = product.Brand || 'Unknown Brand';
+                            card.dataset.origin = product.Origin || 'Unknown Origin';
+                            card.dataset.sku = product.SKU || 'N/A';
+                            card.dataset.price = product.Price || 0;
                             
                             card.innerHTML = `
                                 <div class="product-image">
-                                    <div class="placeholder-image"><i class="fas fa-box-open"></i></div>
+                                    ${product.Product_Image ? 
+                                        `<img src="${product.Product_Image}" alt="${product.Product_Name}">` : 
+                                        '<div class="placeholder-image"><i class="fas fa-box-open"></i></div>'}
                                 </div>
                                 <div class="product-details">
-                                    <div class="product-name">${product.name}</div>
+                                    <div class="product-name">${product.Product_Name || 'Unnamed Product'}</div>
                                     
                                     <div class="product-meta">
-                                        <span><i class="fas fa-tag"></i> ${product.brand}</span>
-                                        <span><i class="fas fa-globe"></i> ${product.origin}</span>
-                                        <span><i class="fas fa-barcode"></i> ${product.sku}</span>
+                                        <span><i class="fas fa-tag"></i> ${product.Brand || 'Unknown Brand'}</span>
+                                        <span><i class="fas fa-globe"></i> ${product.Origin || 'Unknown Origin'}</span>
+                                        <span><i class="fas fa-barcode"></i> ${product.SKU || 'N/A'}</span>
                                     </div>
                                     
-                                    <div class="product-meta">
-                                        <span>${product.description}</span>
-                                    </div>
-                                    
-                                    <div class="product-price">$${(product.price || 0).toFixed(2)}</div>
+                                    <div class="product-price">${(product.Price || 0).toFixed(2)}</div>
                                     
                                     <div class="product-actions">
                                         <div class="quantity-control">
@@ -730,10 +846,13 @@
                     } else {
                         productList.innerHTML = '<div class="no-results"><i class="fas fa-search"></i> No products found</div>';
                     }
-                }, 500); // Simulate network delay
+                } catch (error) {
+                    console.error('Error loading products:', error);
+                    productList.innerHTML = '<div class="error-message"><i class="fas fa-exclamation-circle"></i> Failed to load products</div>';
+                }
             }
             
-            function submitOrder() {
+            async function submitOrder() {
                 if (!config.currentCustomer) {
                     showError(orderError, 'Please select a customer first');
                     return false;
@@ -744,16 +863,77 @@
                     return false;
                 }
                 
-                // Simulate order submission (replace with API call)
-                setTimeout(() => {
-                    orderSuccess.style.display = 'flex';
+                try {
                     orderError.style.display = 'none';
+                    nextBtn.disabled = true;
+                    nextBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+                    
+                    // First create the order
+                    const orderResponse = await fetch(
+                        `https://creator.zoho.com/api/v2/${config.zoho.portalName}/${config.zoho.appName}/form/${config.zoho.orderForm}`,
+                        {
+                            method: 'POST',
+                            headers: {
+                                'Authorization': `Zoho-oauthtoken ${config.accessToken}`,
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                data: {
+                                    Customer_Name: config.currentCustomer.name,
+                                    Contact_Number: config.currentCustomer.phone,
+                                    Store_Name: config.currentCustomer.store,
+                                    OrderTotal: calculateOrderTotal(),
+                                    Delivery_Notes: deliveryNotes.value,
+                                    Status: 'Pending'
+                                }
+                            })
+                        }
+                    );
+                    
+                    const orderData = await orderResponse.json();
+                    const orderId = orderData.data.ID;
+                    
+                    if (!orderId) {
+                        throw new Error('Failed to create order');
+                    }
+                    
+                    // Then add order items
+                    for (const item of config.cartItems) {
+                        await fetch(
+                            `https://creator.zoho.com/api/v2/${config.zoho.portalName}/${config.zoho.appName}/form/${config.zoho.orderItemForm}`,
+                            {
+                                method: 'POST',
+                                headers: {
+                                    'Authorization': `Zoho-oauthtoken ${config.accessToken}`,
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify({
+                                    data: {
+                                        Order_ID: orderId,
+                                        Product_Name: item.productName,
+                                        Quantity: item.quantity,
+                                        Unit_Price: item.price,
+                                        Total_Price: item.price * item.quantity
+                                    }
+                                })
+                            }
+                        );
+                    }
+                    
+                    // Show success message
+                    orderSuccess.style.display = 'flex';
                     
                     // Reset form after 2 seconds
                     setTimeout(resetForm, 2000);
-                }, 1000);
-                
-                return true;
+                    
+                    return true;
+                } catch (error) {
+                    console.error('Error submitting order:', error);
+                    showError(orderError, 'Failed to submit order. Please try again.');
+                    nextBtn.disabled = false;
+                    nextBtn.innerHTML = 'Submit Order <i class="fas fa-arrow-right"></i>';
+                    return false;
+                }
             }
             
             function calculateOrderTotal() {
@@ -767,9 +947,11 @@
                 customerSearch.value = '';
                 config.currentCustomer = null;
                 customerDropdown.style.display = 'none';
+                customerInfo.style.display = 'none';
                 
                 // Clear cart
                 config.cartItems = [];
+                productSearch.value = '';
                 
                 // Reset to first step
                 currentStep = 0;
@@ -777,17 +959,20 @@
                 
                 // Hide success message
                 orderSuccess.style.display = 'none';
+                
+                // Reset next button
+                nextBtn.disabled = false;
+                nextBtn.innerHTML = 'Next <i class="fas fa-arrow-right"></i>';
             }
             
             // Form Functions
             function setupEventListeners() {
-                // Customer search and selection
+                // Customer search
                 customerSearch.addEventListener('focus', function() {
                     customerDropdown.style.display = 'block';
                 });
                 
                 customerSearch.addEventListener('blur', function() {
-                    // Hide dropdown after a short delay to allow click
                     setTimeout(() => {
                         customerDropdown.style.display = 'none';
                     }, 200);
@@ -809,11 +994,26 @@
                 
                 // Select customer from dropdown
                 customerDropdown.addEventListener('click', function(e) {
-                    if (e.target.classList.contains('customer-dropdown-item')) {
-                        config.currentCustomer = e.target.dataset.id;
-                        customerSearch.value = e.target.textContent;
+                    const item = e.target.closest('.customer-dropdown-item');
+                    if (item) {
+                        config.currentCustomer = {
+                            id: item.dataset.id,
+                            name: item.querySelector('div:first-child').textContent.trim(),
+                            phone: item.dataset.phone,
+                            store: item.dataset.store
+                        };
+                        
+                        customerSearch.value = config.currentCustomer.name;
+                        customerPhone.value = config.currentCustomer.phone;
+                        storeName.value = config.currentCustomer.store;
+                        customerInfo.style.display = 'block';
                         hideError(customerError);
                     }
+                });
+                
+                // Add new customer button
+                addCustomerBtn.addEventListener('click', function() {
+                    window.open('https://creatorapp.zoho.com/hishammanager_qutteneh/sales-rep-product-catalog-and-order-management/#Form:Customer', '_blank');
                 });
                 
                 // Product search
@@ -869,7 +1069,7 @@
                         const productCard = btn.closest('.product-card');
                         const productId = productCard.dataset.id;
                         const productName = productCard.dataset.name;
-                        const productPrice = parseFloat(productCard.querySelector('.product-price').textContent.replace('$', ''));
+                        const productPrice = parseFloat(productCard.dataset.price);
                         const quantity = parseInt(productCard.querySelector('.quantity-input').value);
                         
                         // Add to cart
@@ -892,13 +1092,13 @@
                 nextBtn.addEventListener('click', async function() {
                     if (currentStep === 0) {
                         // Validate customer selection
-                        if (!customerSearch.value || !config.currentCustomer) {
+                        if (!config.currentCustomer) {
                             showError(customerError, 'Please select a customer');
                             return;
                         }
                         
                         // Moving to products step - load products
-                        loadProducts();
+                        await loadProducts();
                         currentStep++;
                         showStep(currentStep);
                     } else if (currentStep === 1) {
@@ -908,7 +1108,7 @@
                         showStep(currentStep);
                     } else {
                         // Submit order
-                        submitOrder();
+                        await submitOrder();
                     }
                 });
                 
@@ -921,6 +1121,14 @@
             }
             
             function updateOrderSummary() {
+                orderCustomerInfo.innerHTML = `
+                    <div><strong>${config.currentCustomer.name}</strong></div>
+                    <div class="product-meta">
+                        <span><i class="fas fa-phone"></i> ${config.currentCustomer.phone || 'N/A'}</span>
+                        <span><i class="fas fa-store"></i> ${config.currentCustomer.store || 'N/A'}</span>
+                    </div>
+                `;
+                
                 orderItems.innerHTML = '';
                 
                 if (config.cartItems.length === 0) {
@@ -936,35 +1144,46 @@
                     total += itemTotal;
                     
                     const itemElement = document.createElement('div');
-                    itemElement.className = 'cart-item';
+                                      itemElement.className = 'cart-item';
                     itemElement.innerHTML = `
                         <div class="cart-item-details">
                             <div class="cart-item-name">${item.productName}</div>
-                            <div class="cart-item-meta">Quantity: ${item.quantity} × $${item.price.toFixed(2)}</div>
+                            <div class="cart-item-meta">
+                                <span>${item.quantity} x JD ${item.price.toFixed(2)}</span>
+                            </div>
                         </div>
-                        <div class="cart-item-price">$${(itemTotal).toFixed(2)}</div>
+                        <div class="cart-item-price">${itemTotal.toFixed(2)}</div>
                     `;
                     
                     orderItems.appendChild(itemElement);
                 });
                 
-                orderTotal.textContent = `$${total.toFixed(2)}`;
+                orderTotal.textContent = `JD ${total.toFixed(2)}`;
             }
             
             function showStep(stepIndex) {
-                stepContents.forEach((content, index) => {
-                    content.style.display = index === stepIndex ? 'block' : 'none';
+                // Hide all steps
+                stepContents.forEach(content => {
+                    content.style.display = 'none';
                 });
                 
-                steps.forEach((step, index) => {
-                    if (index <= stepIndex) {
-                        step.classList.add('active');
-                    } else {
-                        step.classList.remove('active');
-                    }
+                // Remove active class from all steps
+                steps.forEach(step => {
+                    step.classList.remove('active');
                 });
                 
+                // Show current step
+                stepContents[stepIndex].style.display = 'block';
+                steps[stepIndex].classList.add('active');
+                
+                // Update button states
                 prevBtn.disabled = stepIndex === 0;
+                
+                if (stepIndex === steps.length - 1) {
+                    nextBtn.innerHTML = 'Submit Order <i class="fas fa-check"></i>';
+                } else {
+                    nextBtn.innerHTML = 'Next <i class="fas fa-arrow-right"></i>';
+                }
             }
             
             function showError(element, message) {
@@ -977,24 +1196,16 @@
             }
             
             function showTempMessage(element, message) {
-                const msg = document.createElement('div');
-                msg.className = 'success-message';
-                msg.style.position = 'absolute';
-                msg.style.bottom = '10px';
-                msg.style.left = '10px';
-                msg.style.right = '10px';
-                msg.style.backgroundColor = 'rgba(56, 142, 60, 0.9)';
-                msg.style.color = 'white';
-                msg.style.padding = '8px 12px';
-                msg.style.borderRadius = '4px';
-                msg.style.zIndex = '10';
-                msg.innerHTML = message;
+                const originalContent = element.innerHTML;
+                const tempDiv = document.createElement('div');
+                tempDiv.className = 'success-message';
+                tempDiv.innerHTML = message;
                 
-                element.style.position = 'relative';
-                element.appendChild(msg);
+                element.innerHTML = '';
+                element.appendChild(tempDiv);
                 
                 setTimeout(() => {
-                    msg.remove();
+                    element.innerHTML = originalContent;
                 }, 2000);
             }
         });
