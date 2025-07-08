@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Order Wizard</title>
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+  />
+  <style>
+    :root {
+      --primary-color: #2a5bd7;
+      --secondary-color: #f0f0f0;
+      --text-color: #333;
+      --light-text: #777;
+      --border-color: #ddd;
+      --error-color: #d32f2f;
+      --success-color: #388e3c;
+      --jd-color: #00a65a;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    body {
+      background-color: #f5f5f5;
+      padding: 20px;
+      color: var(--text-color);
+    }
+    .wizard-container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      overflow: hidden;
+    }
+    .wizard-header {
+      padding: 20px;
+      background: var(--primary-color);
+      color: white;
+      text-align: center;
+    }
+    .wizard-title {
+      font-size: 22px;
+      font-weight: 600;
+    }
+    .wizard-steps {
+      display: flex;
+      background: var(--secondary-color);
+      list-style: none;
+    }
+    .wizard-step {
+      flex: 1;
+      padding: 15px 10px;
+      text-align: center;
+      color: var(--light-text);
+      position: relative;
+      font-weight: 500;
+      font-size: 14px;
+    }
+    .wizard-step.active {
+      background: white;
+      color: var(--primary-color);
+      font-weight: 600;
+    }
+    .wizard-step.active:after {
+      content: '';
+      position: absolute;
+      bottom: -1px;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--primary-color);
+    }
+    .wizard-content {
+      padding: 25px;
+      min-height: 300px;
+    }
+    .form-group {
+      margin-bottom: 25px;
+      position: relative;
+    }
+    .form-label {
+      display: block;
+      margin-bottom: 10px;
+      font-weight: 500;
+      font-size: 15px;
+    }
+    .form-control {
+      width: 100%;
+      padding: 12px 15px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      font-size: 15px;
+      transition: border-color 0.3s;
+    }
+    .form-control:focus {
+      outline: none;
+      border-color: var(--primary-color);
+    }
+    .search-input {
+      padding-left: 40px;
+    }
+    .search-icon {
+      position: absolute;
+      left: 15px;
+      top: 42px;
+      color: var(--light-text);
+    }
+    .btn {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s;
+    }
+    .btn i {
+      margin-right: 8px;
+    }
+    .btn-primary {
+      background: var(--primary-color);
+      color: white;
+    }
+    .btn-primary:hover {
+      background: #1a4bc7;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    .btn-secondary {
+      background: var(--secondary-color);
+      color: var(--text-color);
+    }
+    .btn-add {
+      background: transparent;
+      border: 1px dashed var(--primary-color);
+      color: var(--primary-color);
+      padding: 10px 20px;
+    }
+    .btn-add:hover {
+      background: rgba(42, 91, 215, 0.1);
+    }
+    .wizard-footer {
+      display: flex;
+      justify-content: space-between;
+      padding: 20px;
+      background: #f9f9f9;
+    }
+    .customer-search-container {
+      position: relative;
+    }
+    .customer-dropdown {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      max-height: 200px;
+      overflow-y: auto;
+      background: white;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      z-index: 10;
+      display: none;
+    }
+    .customer-dropdown-item {
+      padding: 10px 15px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .customer-dropdown-item:hover {
+      background: #f5f5f5;
+    }
+    .product-list {
+      margin-top: 20px;
+    }
+    .product-card {
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 15px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+    .product-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+    }
+    .product-image {
+      width: 120px;
+      height: 120px;
+      background: #f9f9f9;
+      border-radius: 8px;
+      margin-right: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    .product-image img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
+    .product-details {
+      flex: 1;
+    }
+    .product-name {
+      font-weight: 600;
+      margin-bottom: 5px;
+      font-size: 16px;
+    }
+    .product-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      margin-bottom: 10px;
+      font-size: 13px;
+      color: var(--light-text);
+    }
+    .product-meta i {
+      margin-right: 5px;
+      color: var(--primary-color);
+      font-size: 12px;
+    }
+    .product-price {
+      color: var(--jd-color);
+      font-weight: 600;
+      margin-bottom: 15px;
+      font-size: 18px;
+    }
+    .product-price:before {
+      content: "JD ";
+    }
+    .product-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .quantity-control {
+      display: flex;
+      align-items: center;
+      background: #f5f5f5;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .quantity-btn {
+      width: 36px;
+      height: 36px;
+      background: var(--secondary-color);
+      border: none;
+      font-size: 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-color);
+    }
+    .quantity-btn:hover {
+      background: #e0e0e0;
+    }
+    .quantity-input {
+      width: 50px;
+      text-align: center;
+      border: none;
+      padding: 5px;
+      font-size: 15px;
+      background: white;
+      border-top: 1px solid var(--border-color);
+      border-bottom: 1px solid var(--border-color);
+    }
+    .cart-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border-color);
+      align-items: center;
+    }
+    .cart-item-details {
+      flex: 1;
+    }
+    .cart-item-name {
+      font-weight: 500;
+      margin-bottom: 3px;
+    }
+    .cart-item-meta {
+      font-size: 13px;
+      color: var(--light-text);
+    }
+    .cart-item-price {
+      font-weight: 600;
+      min-width: 80px;
+      text-align: right;
+      color: var(--jd-color);
+    }
+    .cart-item-price:before {
+      content: "JD ";
+    }
+    .order-total {
+      padding: 15px 0;
+      font-weight: 600;
+      font-size: 18px;
+      display: flex;
+      justify-content: space-between;
+      border-top: 1px solid var(--border-color);
+      margin-top: 10px;
+      color: var(--jd-color);
+    }
+    .order-total span:first-child {
+      color: var(--text-color);
+    }
+    .section-title {
+      font-weight: 600;
+      margin: 25px 0 15px;
+      color: var(--text-color);
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+    }
+    .section-title i {
+      margin-right: 10px;
+      color: var(--primary-color);
+    }
+    .no-results, .loading {
+      text-align: center;
+      padding: 30px 20px;
+      color: var(--light-text);
+      font-size: 15px;
+    }
+    .loading i {
+      animation: spin 1s linear infinite;
+      margin-right: 10px;
+    }
+    .error-message {
+      color: var(--error-color);
+      margin-top: 10px;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+    }
+    .error-message i {
+      margin-right: 5px;
+    }
+    .success-message {
+      color: var(--success-color);
+      margin-top: 10px;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+    }
+    .success-message i {
+      margin-right: 5px;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    @media (max-width: 768px) {
+      .wizard-step { font-size: 12px; padding: 12px 5px; }
+      .wizard-content { padding: 20px; }
+      .product-card { flex-direction: column; align-items: flex-start; }
+      .product-image {
+        width: 100%;
+        height: 180px;
+        margin: 0 0 15px 0;
+      }
+      .product-actions { width: 100%; }
+      .btn { padding: 10px 15px; font-size: 14px; }
+      .wizard-footer { flex-direction: column; gap: 10px; }
+    }
+    @media (max-width: 480px) {
+      .wizard-step { font-size: 11px; padding: 10px 3px; }
+    }
+  </style>
+  <script src="https://creatorapp.zoho.com/js/ZohoCreatorEmbed.js"></script>
+</head>
+<body>
+  <div class="wizard-container">
+    <div class="wizard-header">
+      <div class="wizard-title">
+        <i class="fas fa-shopping-cart"></i> Order Management System
+      </div>
+    </div>
+    <ul class="wizard-steps">
+      <li class="wizard-step active"><i class="fas fa-user"></i> 1. Customer</li>
+      <li class="wizard-step"><i class="fas fa-box-open"></i> 2. Products</li>
+      <li class="wizard-step"><i class="fas fa-check-circle"></i> 3. Review</li>
+    </ul>
+    <div class="wizard-content">
+      <!-- Step 1: Customer -->
+      <div id="step1" class="wizard-step-content">
+        <div class="form-group">
+          <label class="form-label"><i class="fas fa-search"></i> Search Customer</label>
+          <div class="customer-search-container">
+            <input
+              type="text"
+              id="customerSearch"
+              class="form-control search-input"
+              placeholder="Type customer name..."
+            />
+            <span class="search-icon"><i class="fas fa-search"></i></span>
+            <div class="customer-dropdown" id="customerDropdown"></div>
+          </div>
+          <div class="error-message" id="customerError" style="display: none;">
+            <i class="fas fa-exclamation-circle"></i>
+            <span>Please select a customer</span>
+          </div>
+        </div>
+        <div id="customerInfo" style="display: none;">
+          <div class="form-group">
+            <label>Contact Number</label>
+            <input type="text" id="customerPhone" class="form-control" readonly />
+          </div>
+          <div class="form-group">
+            <label>Store Name</label>
+            <input type="text" id="storeName" class="form-control" readonly />
+          </div>
+        </div>
+        <button class="btn btn-add" id="addCustomerBtn">
+          <i class="fas fa-plus"></i> Add New Customer
+        </button>
+      </div>
+      <!-- Step 2: Products -->
+      <div id="step2" class="wizard-step-content" style="display: none;">
+        <div class="form-group">
+          <label class="form-label"><i class="fas fa-search"></i> Search Products</label>
+          <div style="position: relative;">
+            <input
+              type="text"
+              id="productSearch"
+              class="form-control search-input"
+              placeholder="Search by product name or brand..."
+            />
+            <span class="search-icon"><i class="fas fa-search"></i></span>
+          </div>
+          <div class="error-message" id="productError" style="display: none;"></div>
+        </div>
+        <div class="product-list" id="productList">
+          <div class="loading"><i class="fas fa-spinner"></i> Loading products...</div>
+        </div>
+      </div>
+      <!-- Step 3: Review -->
+      <div id="step3" class="wizard-step-content" style="display: none;">
+        <div class="form-group">
+          <label class="form-label"><i class="fas fa-user"></i> Customer Information</label>
+          <div id="orderCustomerInfo"></div>
+        </div>
+        <div class="form-group">
+          <label class="form-label"><i class="fas fa-boxes"></i> Order Items</label>
+          <div id="orderItems"></div>
+        </div>
+        <div class="form-group">
+          <label class="form-label"><i class="fas fa-edit"></i> Delivery Notes</label>
+          <textarea id="deliveryNotes" class="form-control" rows="3"></textarea>
+        </div>
+        <div class="order-total">
+          <span>Order Total:</span>
+          <span id="orderTotal">JD 0.00</span>
+        </div>
+        <div class="success-message" id="orderSuccess" style="display: none;">
+          <i class="fas fa-check-circle"></i>
+          <span>Order submitted successfully!</span>
+        </div>
+        <div class="error-message" id="orderError" style="display: none;"></div>
+      </div>
+    </div>
+    <div class="wizard-footer">
+      <button class="btn btn-secondary" id="prevBtn" disabled>
+        <i class="fas fa-arrow-left"></i> Previous
+      </button>
+      <button class="btn btn-primary" id="nextBtn">
+        Next <i class="fas fa-arrow-right"></i>
+      </button>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      // DOM elements
+      const customerSearch = document.getElementById('customerSearch');
+      const customerDropdown = document.getElementById('customerDropdown');
+      const customerError = document.getElementById('customerError');
+      const customerInfo = document.getElementById('customerInfo');
+      const customerPhone = document.getElementById('customerPhone');
+      const storeName = document.getElementById('storeName');
+      const addCustomerBtn = document.getElementById('addCustomerBtn');
+      const productSearch = document.getElementById('productSearch');
+      const productList = document.getElementById('productList');
+      const productError = document.getElementById('productError');
+      const orderCustomerInfo = document.getElementById('orderCustomerInfo');
+      const orderItems = document.getElementById('orderItems');
+      const orderTotal = document.getElementById('orderTotal');
+      const deliveryNotes = document.getElementById('deliveryNotes');
+      const orderSuccess = document.getElementById('orderSuccess');
+      const orderError = document.getElementById('orderError');
+      const prevBtn = document.getElementById('prevBtn');
+      const nextBtn = document.getElementById('nextBtn');
+      const stepContents = document.querySelectorAll('.wizard-step-content');
+      const steps = document.querySelectorAll('.wizard-step');
+
+      // State
+      let currentStep = 0;
+      let currentCustomer = null;
+      let cartItems = [];
+
+      // Show step
+      function showStep(i) {
+        stepContents.forEach((c) => (c.style.display = 'none'));
+        steps.forEach((s) => s.classList.remove('active'));
+        stepContents[i].style.display = 'block';
+        steps[i].classList.add('active');
+        prevBtn.disabled = i === 0;
+        nextBtn.innerHTML =
+          i === steps.length - 1
+            ? 'Submit Order <i class="fas fa-check"></i>'
+            : 'Next <i class="fas fa-arrow-right"></i>';
+      }
+
+      // Errors
+      function showError(el, msg) {
+        el.style.display = 'flex';
+        el.querySelector('span').textContent = msg;
+      }
+      function hideError(el) {
+        el.style.display = 'none';
+      }
+
+      // Load customers via SDK
+      async function loadCustomers() {
+        customerDropdown.innerHTML =
+          '<div class="loading"><i class="fas fa-spinner"></i> Loading customers...</div>';
+        try {
+          const resp = await ZOHO.CREATOR.API.getAllRecords({
+            appName: 'sales-rep-product-catalog-and-order-management',
+            reportName: 'Customer_Report',
+            from: 1,
+            to: 200,
+          });
+          const list = resp.data || [];
+          customerDropdown.innerHTML = list.length
+            ? ''
+            : '<div class="no-results"><i class="fas fa-search"></i> No customers found</div>';
+          list.forEach((c) => {
+            const div = document.createElement('div');
+            div.className = 'customer-dropdown-item';
+            div.dataset.id = c.ID;
+            div.dataset.phone = c.Contact_Number || '';
+            div.dataset.store = c.Store_Name || '';
+            div.innerHTML = `
+              <div><strong>${c.Customer_Name || 'Unnamed Customer'}</strong></div>
+              <div class="product-meta">
+                <span><i class="fas fa-phone"></i> ${c.Contact_Number || 'N/A'}</span>
+                <span><i class="fas fa-store"></i> ${c.Store_Name || 'N/A'}</span>
+              </div>`;
+            customerDropdown.appendChild(div);
+          });
+        } catch (e) {
+          customerDropdown.innerHTML =
+            '<div class="error-message"><i class="fas fa-exclamation-circle"></i> Failed to load customers</div>';
+          console.error(e);
+        }
+      }
+
+      // Load products via SDK
+      async function loadProducts() {
+        productList.innerHTML =
+          '<div class="loading"><i class="fas fa-spinner"></i> Loading products...</div>';
+        try {
+          const resp = await ZOHO.CREATOR.API.getAllRecords({
+            appName: 'sales-rep-product-catalog-and-order-management',
+            reportName: 'Product_Report',
+            from: 1,
+            to: 200,
+          });
+          const list = resp.data || [];
+          productList.innerHTML = list.length
+            ? ''
+            : '<div class="no-results"><i class="fas fa-search"></i> No products found</div>';
+          list.forEach((p) => {
+            const card = document.createElement('div');
+            card.className = 'product-card';
+            card.dataset.id = p.ID;
+            card.dataset.name = p.Product_Name || 'Unnamed Product';
+            card.dataset.brand = p.Brand || 'Unknown Brand';
+            card.dataset.origin = p.Origin || 'Unknown Origin';
+            card.dataset.sku = p.SKU || 'N/A';
+            card.dataset.price = p.Price || 0;
+            card.innerHTML = `
+              <div class="product-image">
+                ${
+                  p.Product_Image
+                    ? `<img src="${p.Product_Image}" alt="${p.Product_Name}" />`
+                    : '<div class="placeholder-image"><i class="fas fa-box-open"></i></div>'
+                }
+              </div>
+              <div class="product-details">
+                <div class="product-name">${p.Product_Name || 'Unnamed Product'}</div>
+                <div class="product-meta">
+                  <span><i class="fas fa-tag"></i> ${p.Brand || 'Unknown Brand'}</span>
+                  <span><i class="fas fa-globe"></i> ${p.Origin || 'Unknown Origin'}</span>
+                  <span><i class="fas fa-barcode"></i> ${p.SKU || 'N/A'}</span>
+                </div>
+                <div class="product-price">${(p.Price || 0).toFixed(2)}</div>
+                <div class="product-actions">
+                  <div class="quantity-control">
+                    <button class="quantity-btn minus-btn"><i class="fas fa-minus"></i></button>
+                    <input type="number" class="quantity-input" value="1" min="1" />
+                    <button class="quantity-btn plus-btn"><i class="fas fa-plus"></i></button>
+                  </div>
+                  <button class="btn btn-primary add-to-cart-btn">
+                    <i class="fas fa-cart-plus"></i> Add
+                  </button>
+                </div>
+              </div>`;
+            productList.appendChild(card);
+          });
+        } catch (e) {
+          productList.innerHTML =
+            '<div class="error-message"><i class="fas fa-exclamation-circle"></i> Failed to load products</div>';
+          console.error(e);
+        }
+      }
+
+      // Calculate total
+      function calculateOrderTotal() {
+        return cartItems.reduce((sum, i) => sum + i.price * i.quantity, 0);
+      }
+
+      // Update review step
+      function updateOrderSummary() {
+        orderCustomerInfo.innerHTML = `
+          <div><strong>${currentCustomer.name}</strong></div>
+          <div class="product-meta">
+            <span><i class="fas fa-phone"></i> ${currentCustomer.phone || 'N/A'}</span>
+            <span><i class="fas fa-store"></i> ${currentCustomer.store || 'N/A'}</span>
+          </div>`;
+        orderItems.innerHTML = '';
+        if (!cartItems.length) {
+          orderItems.innerHTML =
+            '<div class="no-results"><i class="fas fa-shopping-cart"></i> No items in cart</div>';
+          orderTotal.textContent = 'JD 0.00';
+          return;
+        }
+        let total = 0;
+        cartItems.forEach((item) => {
+          const itemTotal = item.price * item.quantity;
+          total += itemTotal;
+          const div = document.createElement('div');
+          div.className = 'cart-item';
+          div.innerHTML = `
+            <div class="cart-item-details">
+              <div class="cart-item-name">${item.productName}</div>
+              <div class="cart-item-meta"><span>${item.quantity} x JD ${item.price.toFixed(
+            2
+          )}</span></div>
+            </div>
+            <div class="cart-item-price">${itemTotal.toFixed(2)}</div>`;
+          orderItems.appendChild(div);
+        });
+        orderTotal.textContent = `JD ${total.toFixed(2)}`;
+      }
+
+      // Submit order via SDK
+      async function submitOrder() {
+        if (!currentCustomer) {
+          showError(orderError, 'Please select a customer first');
+          return;
+        }
+        if (!cartItems.length) {
+          showError(orderError, 'Please add at least one product');
+          return;
+        }
+        orderError.style.display = 'none';
+        nextBtn.disabled = true;
+        nextBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+        try {
+          // Create Order record
+          const orderResp = await ZOHO.CREATOR.API.addRecord({
+            appName: 'sales-rep-product-catalog-and-order-management',
+            formName: 'Order',
+            data: {
+              Customer_Name: currentCustomer.name,
+              Contact_Number: currentCustomer.phone,
+              Store_Name: currentCustomer.store,
+              OrderTotal: calculateOrderTotal(),
+              Delivery_Notes: deliveryNotes.value,
+              Status: 'Pending',
+            },
+          });
+          const orderId = orderResp.data.ID;
+          // Create Order_Items records
+          for (const it of cartItems) {
+            await ZOHO.CREATOR.API.addRecord({
+              appName: 'sales-rep-product-catalog-and-order-management',
+              formName: 'Order_Items',
+              data: {
+                Order_ID: orderId,
+                Product_Name: it.productName,
+                Quantity: it.quantity,
+                Unit_Price: it.price,
+                Total_Price: it.price * it.quantity,
+              },
+            });
+          }
+          orderSuccess.style.display = 'flex';
+          setTimeout(() => location.reload(), 2000);
+        } catch (e) {
+          console.error(e);
+          showError(orderError, 'Failed to submit order. Please try again.');
+          nextBtn.disabled = false;
+          nextBtn.innerHTML = 'Submit Order <i class="fas fa-check"></i>';
+        }
+      }
+
+      // Event listeners
+      function setupEventListeners() {
+        // Customer search
+        customerSearch.addEventListener('focus', () => (customerDropdown.style.display = 'block'));
+        customerSearch.addEventListener('blur', () =>
+          setTimeout(() => (customerDropdown.style.display = 'none'), 200)
+        );
+        customerSearch.addEventListener('input', function () {
+          const term = this.value.toLowerCase();
+          customerDropdown
+            .querySelectorAll('.customer-dropdown-item')
+            .forEach((item) => {
+              item.style.display = item.textContent.toLowerCase().includes(term)
+                ? 'block'
+                : 'none';
+            });
+        });
+        // Select customer
+        customerDropdown.addEventListener('click', (e) => {
+          const item = e.target.closest('.customer-dropdown-item');
+          if (!item) return;
+          currentCustomer = {
+            id: item.dataset.id,
+            name: item.querySelector('strong').textContent,
+            phone: item.dataset.phone,
+            store: item.dataset.store,
+          };
+          customerSearch.value = currentCustomer.name;
+          customerPhone.value = currentCustomer.phone;
+          storeName.value = currentCustomer.store;
+          customerInfo.style.display = 'block';
+          hideError(customerError);
+        });
+        // Add new customer
+        addCustomerBtn.addEventListener('click', () => {
+          window.open(
+            'https://creatorapp.zoho.com/hishammanager_qutteneh/sales-rep-product-catalog-and-order-management/#Form:Customer',
+            '_blank'
+          );
+        });
+        // Product search filter
+        productSearch.addEventListener('input', function () {
+          const term = this.value.toLowerCase();
+          let found = false;
+          productList.querySelectorAll('.product-card').forEach((card) => {
+            const name = card.dataset.name.toLowerCase();
+            const brand = card.dataset.brand.toLowerCase();
+            if (name.includes(term) || brand.includes(term)) {
+              card.style.display = 'flex';
+              found = true;
+            } else {
+              card.style.display = 'none';
+            }
+          });
+          const noRes = productList.querySelector('.no-results');
+          if (!found && productList.querySelectorAll('.product-card').length) {
+            if (!noRes) {
+              const div = document.createElement('div');
+              div.className = 'no-results';
+              div.innerHTML = '<i class="fas fa-search"></i> No products matching your search';
+              productList.appendChild(div);
+            }
+          } else if (noRes) {
+            noRes.remove();
+          }
+        });
+        // Quantity and Add to cart
+        productList.addEventListener('click', (e) => {
+          if (e.target.closest('.plus-btn')) {
+            const inp = e.target.closest('.quantity-control').querySelector('.quantity-input');
+            inp.value = parseInt(inp.value) + 1;
+          }
+          if (e.target.closest('.minus-btn')) {
+            const inp = e.target.closest('.quantity-control').querySelector('.quantity-input');
+            if (parseInt(inp.value) > 1) inp.value = parseInt(inp.value) - 1;
+          }
+          if (e.target.closest('.add-to-cart-btn')) {
+            const card = e.target.closest('.product-card');
+            const id = card.dataset.id;
+            const name = card.dataset.name;
+            const price = parseFloat(card.dataset.price);
+            const qty = parseInt(card.querySelector('.quantity-input').value);
+            cartItems.push({ productId: id, productName: name, price: price, quantity: qty });
+            card.querySelector('.quantity-input').value = 1;
+            const msg = document.createElement('div');
+            msg.className = 'success-message';
+            msg.innerHTML = `<i class="fas fa-check"></i> Added ${qty} × ${name}`;
+            card.innerHTML = '';
+            card.appendChild(msg);
+            setTimeout(() => loadProducts(), 1500);
+          }
+        });
+        // Navigation
+        nextBtn.addEventListener('click', async () => {
+          if (currentStep === 0) {
+            if (!currentCustomer) {
+              showError(customerError, 'Please select a customer');
+              return;
+            }
+            await loadProducts();
+            currentStep++;
+            showStep(currentStep);
+          } else if (currentStep === 1) {
+            updateOrderSummary();
+            currentStep++;
+            showStep(currentStep);
+          } else {
+            await submitOrder();
+          }
+        });
+        prevBtn.addEventListener('click', () => {
+          if (currentStep > 0) {
+            currentStep--;
+            showStep(currentStep);
+          }
+        });
+      }
+
+      setupEventListeners();
+      showStep(0);
+
+      // Initialize customer list on load
+      ZOHO.embeddedApp.on('PageLoad', function (data) {
+        loadCustomers();
+      });
+    });
+  </script>
+</body>
+</html>
