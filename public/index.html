@@ -410,7 +410,7 @@
     @media (max-width: 480px) {
       .wizard-step { font-size: 11px; padding: 10px 3px; }
     }
-  </style>
+</style>
 </head>
 <body>
   <div class="wizard-container">
@@ -425,6 +425,7 @@
       <li class="wizard-step"><i class="fas fa-check-circle"></i> 3. Review</li>
     </ul>
     <div class="wizard-content">
+      <!-- Step 1 -->
       <div id="step1" class="wizard-step-content" style="display: block;">
         <div class="form-group">
           <label class="form-label"><i class="fas fa-search"></i> Search Customer</label>
@@ -440,11 +441,18 @@
           </div>
         </div>
         <div class="form-group" id="customerInfo" style="display: none;">
-          <div class="form-group"><label>Contact Number</label><input type="text" id="customerPhone" class="form-control" readonly></div>
-          <div class="form-group"><label>Store Name</label><input type="text" id="storeName" class="form-control" readonly></div>
+          <div class="form-group">
+            <label>Contact Number</label>
+            <input type="text" id="customerPhone" class="form-control" readonly>
+          </div>
+          <div class="form-group">
+            <label>Store Name</label>
+            <input type="text" id="storeName" class="form-control" readonly>
+          </div>
         </div>
         <button class="btn btn-add" id="addCustomerBtn"><i class="fas fa-plus"></i> Add New Customer</button>
       </div>
+      <!-- Step 2 -->
       <div id="step2" class="wizard-step-content" style="display: none;">
         <div class="form-group">
           <label class="form-label"><i class="fas fa-search"></i> Search Products</label>
@@ -458,6 +466,7 @@
           <div class="loading"><i class="fas fa-spinner"></i> Loading products...</div>
         </div>
       </div>
+      <!-- Step 3 -->
       <div id="step3" class="wizard-step-content" style="display: none;">
         <div class="form-group">
           <label class="form-label"><i class="fas fa-user"></i> Customer Information</label>
@@ -506,6 +515,7 @@
         accessToken: null
       };
 
+      // DOM references
       const steps = document.querySelectorAll('.wizard-step');
       const contents = document.querySelectorAll('.wizard-step-content');
       const prevBtn = document.getElementById('prevBtn');
@@ -528,6 +538,7 @@
       const addCustomerBtn = document.getElementById('addCustomerBtn');
       let currentStep = 0;
 
+      // Helpers
       async function getZohoAccessToken() {
         const resp = await fetch('/zoho/token');
         const data = await resp.json();
@@ -543,7 +554,7 @@
         );
         const data = await resp.json();
         customerDropdown.innerHTML = '';
-        if (data.data && data.data.length) {
+        if (data.data?.length) {
           data.data.forEach(c => {
             const item = document.createElement('div');
             item.className = 'customer-dropdown-item';
@@ -571,16 +582,16 @@
         );
         const data = await resp.json();
         productList.innerHTML = '';
-        if (data.data && data.data.length) {
+        if (data.data?.length) {
           data.data.forEach(p => {
             const card = document.createElement('div');
             card.className = 'product-card';
             card.dataset.id = p.ID;
-            card.dataset.name = p.Product_Name||'';
-            card.dataset.brand = p.Brand||'';
-            card.dataset.origin = p.Origin||'';
-            card.dataset.sku = p.SKU||'';
-            card.dataset.price = p.Price||0;
+            card.dataset.name = p.Product_Name || '';
+            card.dataset.brand = p.Brand || '';
+            card.dataset.origin = p.Origin || '';
+            card.dataset.sku = p.SKU || '';
+            card.dataset.price = p.Price || 0;
             card.innerHTML = `
               <div class="product-image">${
                 p.Product_Image
@@ -588,11 +599,11 @@
                   : '<div class="placeholder-image"><i class="fas fa-box-open"></i></div>'
               }</div>
               <div class="product-details">
-                <div class="product-name">${p.Product_Name||'Unnamed'}</div>
+                <div class="product-name">${p.Product_Name || 'Unnamed'}</div>
                 <div class="product-meta">
-                  <span><i class="fas fa-tag"></i> ${p.Brand||'N/A'}</span>
-                  <span><i class="fas fa-globe"></i> ${p.Origin||'N/A'}</span>
-                  <span><i class="fas fa-barcode"></i> ${p.SKU||'N/A'}</span>
+                  <span><i class="fas fa-tag"></i> ${p.Brand || 'N/A'}</span>
+                  <span><i class="fas fa-globe"></i> ${p.Origin || 'N/A'}</span>
+                  <span><i class="fas fa-barcode"></i> ${p.SKU || 'N/A'}</span>
                 </div>
                 <div class="product-price">${(p.Price||0).toFixed(2)}</div>
                 <div class="product-actions">
@@ -612,225 +623,246 @@
       }
 
       function calculateOrderTotal() {
-        return config.cartItems.reduce((t,i) => t + i.price*i.quantity, 0);
+        return config.cartItems.reduce((t,i) => t + (i.price * i.quantity), 0);
       }
 
       async function submitOrder() {
         if (!config.currentCustomer) {
-          showError(orderError,'Please select a customer first'); return false;
+          showError(orderError,'Please select a customer first');
+          return false;
         }
         if (!config.cartItems.length) {
-          showError(orderError,'Add at least one product'); return false;
+          showError(orderError,'Please add at least one product');
+          return false;
         }
-        orderError.style.display='none';
-        nextBtn.disabled=true; nextBtn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Processing...';
+        orderError.style.display = 'none';
+        nextBtn.disabled = true;
+        nextBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
         try {
-          const respOrder = await fetch(
+          const orderResp = await fetch(
             `https://creator.zoho.com/api/v2/${config.zoho.portalName}/${config.zoho.appName}/form/${config.zoho.orderForm}`,
             {
-              method:'POST',
-              headers:{
-                'Authorization':`Zoho-oauthtoken ${config.accessToken}`,
-                'Content-Type':'application/json'
+              method: 'POST',
+              headers: {
+                'Authorization': `Zoho-oauthtoken ${config.accessToken}`,
+                'Content-Type': 'application/json'
               },
-              body:JSON.stringify({ data:{
-                Customer_Name:config.currentCustomer.name,
-                Contact_Number:config.currentCustomer.phone,
-                Store_Name:config.currentCustomer.store,
-                OrderTotal:calculateOrderTotal(),
-                Delivery_Notes:deliveryNotes.value,
-                Status:'Pending'
-              }})
+              body: JSON.stringify({
+                data: {
+                  Customer_Name: config.currentCustomer.name,
+                  Contact_Number: config.currentCustomer.phone,
+                  Store_Name: config.currentCustomer.store,
+                  OrderTotal: calculateOrderTotal(),
+                  Delivery_Notes: deliveryNotes.value,
+                  Status: 'Pending'
+                }
+              })
             }
           );
-          const dataOrder = await respOrder.json();
-          const orderId = dataOrder.data.ID;
+          const orderData = await orderResp.json();
+          const orderId = orderData.data.ID;
           for (let item of config.cartItems) {
             await fetch(
               `https://creator.zoho.com/api/v2/${config.zoho.portalName}/${config.zoho.appName}/form/${config.zoho.orderItemForm}`,
               {
-                method:'POST',
-                headers:{
-                  'Authorization':`Zoho-oauthtoken ${config.accessToken}`,
-                  'Content-Type':'application/json'
+                method: 'POST',
+                headers: {
+                  'Authorization': `Zoho-oauthtoken ${config.accessToken}`,
+                  'Content-Type': 'application/json'
                 },
-                body:JSON.stringify({ data:{
-                  Order_ID:orderId,
-                  Product_Name:item.productName,
-                  Quantity:item.quantity,
-                  Unit_Price:item.price,
-                  Total_Price:item.price*item.quantity
-                }})
+                body: JSON.stringify({
+                  data: {
+                    Order_ID: orderId,
+                    Product_Name: item.productName,
+                    Quantity: item.quantity,
+                    Unit_Price: item.price,
+                    Total_Price: item.price * item.quantity
+                  }
+                })
               }
             );
           }
-          orderSuccess.style.display='flex';
-          setTimeout(resetForm,2000);
+          orderSuccess.style.display = 'flex';
+          setTimeout(resetForm, 2000);
           return true;
-        } catch(e) {
+        } catch (e) {
           console.error(e);
-          showError(orderError,'Failed to submit order');
-          nextBtn.disabled=false;
-          nextBtn.innerHTML='Submit Order <i class="fas fa-arrow-right"></i>';
+          showError(orderError, 'Failed to submit order. Please try again.');
+          nextBtn.disabled = false;
+          nextBtn.innerHTML = 'Submit Order <i class="fas fa-arrow-right"></i>';
           return false;
         }
       }
 
       function resetForm() {
-        customerSearch.value='';
-        config.currentCustomer=null;
-        customerDropdown.style.display='none';
-        customerInfo.style.display='none';
-        config.cartItems=[];
-        productSearch.value='';
-        currentStep=0; showStep(0);
-        orderSuccess.style.display='none';
-        nextBtn.disabled=false;
-        nextBtn.innerHTML='Next <i class="fas fa-arrow-right"></i>';
+        customerSearch.value = '';
+        config.currentCustomer = null;
+        customerDropdown.style.display = 'none';
+        customerInfo.style.display = 'none';
+        config.cartItems = [];
+        productSearch.value = '';
+        currentStep = 0;
+        showStep(0);
+        orderSuccess.style.display = 'none';
+        nextBtn.disabled = false;
+        nextBtn.innerHTML = 'Next <i class="fas fa-arrow-right"></i>';
       }
 
-      function showStep(idx){
-        contents.forEach(c=>c.style.display='none');
-        steps.forEach(s=>s.classList.remove('active'));
-        contents[idx].style.display='block';
+      function showStep(idx) {
+        contents.forEach(c => c.style.display = 'none');
+        steps.forEach(s => s.classList.remove('active'));
+        contents[idx].style.display = 'block';
         steps[idx].classList.add('active');
-        prevBtn.disabled = idx===0;
-        nextBtn.innerHTML = idx===steps.length-1
+        prevBtn.disabled = idx === 0;
+        nextBtn.innerHTML = idx === steps.length - 1
           ? 'Submit Order <i class="fas fa-check"></i>'
           : 'Next <i class="fas fa-arrow-right"></i>';
       }
 
-      function showError(el,msg){
-        el.style.display='flex';
-        el.querySelector('span').textContent=msg;
+      function showError(el,msg) {
+        el.style.display = 'flex';
+        el.querySelector('span').textContent = msg;
       }
-      function hideError(el){ el.style.display='none'; }
+      function hideError(el) {
+        el.style.display = 'none';
+      }
 
       function setupEventListeners() {
-        // Customer
-        customerSearch.addEventListener('focus',()=> customerDropdown.style.display='block');
-        customerSearch.addEventListener('blur',()=> setTimeout(()=>customerDropdown.style.display='none',200));
-        customerSearch.addEventListener('input',()=> {
-          const term=customerSearch.value.toLowerCase();
-          document.querySelectorAll('.customer-dropdown-item').forEach(item=>{
-            item.style.display = item.textContent.toLowerCase().includes(term)?'block':'none';
+        // Customer events
+        customerSearch.addEventListener('focus', () => customerDropdown.style.display = 'block');
+        customerSearch.addEventListener('blur', () => setTimeout(() => customerDropdown.style.display = 'none', 200));
+        customerSearch.addEventListener('input', () => {
+          const term = customerSearch.value.toLowerCase();
+          document.querySelectorAll('.customer-dropdown-item').forEach(item => {
+            item.style.display = item.textContent.toLowerCase().includes(term) ? 'block' : 'none';
           });
         });
-        customerDropdown.addEventListener('click',e=>{
+        customerDropdown.addEventListener('click', e => {
           const item = e.target.closest('.customer-dropdown-item');
           if (!item) return;
           config.currentCustomer = {
-            id:item.dataset.id,
-            name:item.querySelector('div:first-child').textContent.trim(),
-            phone:item.dataset.phone, store:item.dataset.store
+            id: item.dataset.id,
+            name: item.querySelector('div:first-child').textContent.trim(),
+            phone: item.dataset.phone,
+            store: item.dataset.store
           };
-          customerSearch.value=config.currentCustomer.name;
-          customerPhone.value=config.currentCustomer.phone;
-          storeName.value=config.currentCustomer.store;
-          customerInfo.style.display='block';
+          customerSearch.value = config.currentCustomer.name;
+          customerPhone.value = config.currentCustomer.phone;
+          storeName.value = config.currentCustomer.store;
+          customerInfo.style.display = 'block';
           hideError(customerError);
         });
-        addCustomerBtn.addEventListener('click',()=> {
-          window.open(`https://creatorapp.zoho.com/${config.zoho.portalName}/${config.zoho.appName}/#Form:Customer`,'_blank');
+        addCustomerBtn.addEventListener('click', () => {
+          window.open(`https://creatorapp.zoho.com/${config.zoho.portalName}/${config.zoho.appName}/#Form:Customer`, '_blank');
         });
 
-        // Products
-        productSearch.addEventListener('input',()=>{
-          const term=productSearch.value.toLowerCase();
-          let any=false;
-          document.querySelectorAll('.product-card').forEach(card=>{
-            const name=card.dataset.name.toLowerCase();
-            const brand=card.dataset.brand.toLowerCase();
-            const show=(name.includes(term)||brand.includes(term));
-            card.style.display= show?'flex':'none';
-            if (show) any=true;
+        // Product events
+        productSearch.addEventListener('input', () => {
+          const term = productSearch.value.toLowerCase();
+          let any = false;
+          document.querySelectorAll('.product-card').forEach(card => {
+            const name = card.dataset.name.toLowerCase();
+            const brand = card.dataset.brand.toLowerCase();
+            const show = name.includes(term) || brand.includes(term);
+            card.style.display = show ? 'flex' : 'none';
+            if (show) any = true;
           });
-          if (!any){
-            if (!productList.querySelector('.no-results')){
-              const div=document.createElement('div');
-              div.className='no-results';
-              div.innerHTML='<i class="fas fa-search"></i> No products matching your search';
-              productList.appendChild(div);
-            }
-          } else {
-            const nr = productList.querySelector('.no-results');
-            if (nr) nr.remove();
+          const nr = productList.querySelector('.no-results');
+          if (!any && !nr) {
+            const div = document.createElement('div');
+            div.className = 'no-results';
+            div.innerHTML = '<i class="fas fa-search"></i> No products matching your search';
+            productList.appendChild(div);
+          } else if (nr && any) {
+            nr.remove();
           }
         });
-        productList.addEventListener('click',e=>{
-          if (e.target.closest('.plus-btn')){
-            const inp=e.target.closest('.quantity-control').querySelector('.quantity-input');
-            inp.value=parseInt(inp.value)+1;
+        productList.addEventListener('click', e => {
+          if (e.target.closest('.plus-btn')) {
+            const inp = e.target.closest('.quantity-control').querySelector('.quantity-input');
+            inp.value = parseInt(inp.value) + 1;
           }
-          if (e.target.closest('.minus-btn')){
-            const inp=e.target.closest('.quantity-control').querySelector('.quantity-input');
-            if (parseInt(inp.value)>1) inp.value=parseInt(inp.value)-1;
+          if (e.target.closest('.minus-btn')) {
+            const inp = e.target.closest('.quantity-control').querySelector('.quantity-input');
+            if (parseInt(inp.value) > 1) inp.value = parseInt(inp.value) - 1;
           }
-          if (e.target.closest('.add-to-cart-btn')){
-            const card=e.target.closest('.product-card');
-            const id=card.dataset.id;
-            const name=card.dataset.name;
-            const price=parseFloat(card.dataset.price);
-            const qty=parseInt(card.querySelector('.quantity-input').value);
-            config.cartItems.push({ productId:id, productName:name, price, quantity:qty });
-            card.querySelector('.quantity-input').value=1;
-            const tmp=document.createElement('div');
-            tmp.className='success-message';
-            tmp.innerHTML=`<i class="fas fa-check"></i> Added ${qty} x ${name}`;
-            const orig=card.innerHTML;
-            card.innerHTML=''; card.appendChild(tmp);
-            setTimeout(()=>{ card.innerHTML=orig },2000);
+          if (e.target.closest('.add-to-cart-btn')) {
+            const card = e.target.closest('.product-card');
+            const id = card.dataset.id;
+            const name = card.dataset.name;
+            const price = parseFloat(card.dataset.price);
+            const qty = parseInt(card.querySelector('.quantity-input').value);
+            config.cartItems.push({ productId: id, productName: name, price: price, quantity: qty });
+            card.querySelector('.quantity-input').value = 1;
+            const tmp = document.createElement('div');
+            tmp.className = 'success-message';
+            tmp.innerHTML = `<i class="fas fa-check"></i> Added ${qty} x ${name}`;
+            const orig = card.innerHTML;
+            card.innerHTML = '';
+            card.appendChild(tmp);
+            setTimeout(() => {
+              card.innerHTML = orig;
+            }, 2000);
           }
         });
 
-        // Nav
-        nextBtn.addEventListener('click',async ()=>{
-          if (currentStep===0){
-            if (!config.currentCustomer){ showError(customerError,'Please select a customer'); return; }
+        // Navigation
+        nextBtn.addEventListener('click', async () => {
+          if (currentStep === 0) {
+            if (!config.currentCustomer) { showError(customerError, 'Please select a customer'); return; }
             await loadProducts();
-            currentStep++; showStep(currentStep);
-          } else if (currentStep===1){
-            // build review
-            orderCustomerInfo.innerHTML = `<div><strong>${config.currentCustomer.name}</strong></div>
+            currentStep++;
+            showStep(currentStep);
+          } else if (currentStep === 1) {
+            orderCustomerInfo.innerHTML = `
+              <div><strong>${config.currentCustomer.name}</strong></div>
               <div class="product-meta">
-                <span><i class="fas fa-phone"></i> ${config.currentCustomer.phone||'N/A'}</span>
-                <span><i class="fas fa-store"></i> ${config.currentCustomer.store||'N/A'}</span>
+                <span><i class="fas fa-phone"></i> ${config.currentCustomer.phone}</span>
+                <span><i class="fas fa-store"></i> ${config.currentCustomer.store}</span>
               </div>`;
-            orderItems.innerHTML='';
-            let tot=0;
-            config.cartItems.forEach(i=>{
-              const itemTotal=i.price*i.quantity; tot+=itemTotal;
-              const div=document.createElement('div');
-              div.className='cart-item';
-              div.innerHTML=`<div class="cart-item-details">
-                <div class="cart-item-name">${i.productName}</div>
-                <div class="cart-item-meta"><span>${i.quantity} x JD ${i.price.toFixed(2)}</span></div>
-              </div><div class="cart-item-price">${itemTotal.toFixed(2)}</div>`;
+            orderItems.innerHTML = '';
+            let total = 0;
+            config.cartItems.forEach(i => {
+              const itemTotal = i.price * i.quantity;
+              total += itemTotal;
+              const div = document.createElement('div');
+              div.className = 'cart-item';
+              div.innerHTML = `
+                <div class="cart-item-details">
+                  <div class="cart-item-name">${i.productName}</div>
+                  <div class="cart-item-meta"><span>${i.quantity} x JD ${i.price.toFixed(2)}</span></div>
+                </div>
+                <div class="cart-item-price">${itemTotal.toFixed(2)}</div>`;
               orderItems.appendChild(div);
             });
-            orderTotal.textContent=`JD ${tot.toFixed(2)}`;
-            currentStep++; showStep(currentStep);
+            orderTotal.textContent = `JD ${total.toFixed(2)}`;
+            currentStep++;
+            showStep(currentStep);
           } else {
             await submitOrder();
           }
         });
-        prevBtn.addEventListener('click',()=>{
-          if (currentStep>0){ currentStep--; showStep(currentStep); }
+        prevBtn.addEventListener('click', () => {
+          if (currentStep > 0) {
+            currentStep--;
+            showStep(currentStep);
+          }
         });
       }
 
-      async function initForm(){
+      // Initialize
+      async function initializeSystem() {
         try {
-          config.accessToken=await getZohoAccessToken();
+          config.accessToken = await getZohoAccessToken();
           await loadCustomers();
           setupEventListeners();
           showStep(0);
-        } catch(e){
-          console.error('Init error:',e);
-          showError(customerError,'Failed to initialize form. Please refresh the page.');
+        } catch (err) {
+          console.error('Initialization error:', err);
+          showError(customerError, 'Failed to initialize form. Please refresh the page.');
         }
       }
-      initForm();
+      initializeSystem();
     });
   </script>
 </body>
